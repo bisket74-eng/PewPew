@@ -185,12 +185,12 @@
 
     .zap-fx-layer { position: fixed; inset: 0; z-index: 250; pointer-events: none; overflow: hidden; }
     .zap-charge-ring { position: fixed; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; border: 4px solid rgba(85,231,255,.95); box-shadow: 0 0 12px rgba(85,231,255,.95), inset 0 0 13px rgba(189,124,255,.8); opacity: 0; animation: zapCharge .46s ease-out forwards; }
-    .zap-beam { position: fixed; height: 9px; border-radius: 999px; transform-origin: left center; transform: rotate(var(--zap-angle)) scaleX(0); background: linear-gradient(90deg, #ffffff 0 8%, #55e7ff 22%, #bd7cff 62%, #ff67c8 100%); box-shadow: 0 0 8px #fff, 0 0 16px rgba(85,231,255,.95), 0 0 28px rgba(255,103,200,.8); opacity: 0; animation: zapBeam .62s .28s cubic-bezier(.14,.78,.2,1) forwards; }
+    .zap-beam { position: fixed; height: 9px; border-radius: 999px; transform-origin: left center; transform: rotate(var(--zap-angle)) scaleX(0); background: linear-gradient(90deg, #ffffff 0 8%, #55e7ff 22%, #bd7cff 62%, #ff67c8 100%); box-shadow: 0 0 8px #fff, 0 0 16px rgba(85,231,255,.95), 0 0 28px rgba(255,103,200,.8); opacity: 0; animation: zapBeam .82s .34s cubic-bezier(.14,.78,.2,1) forwards; }
     .zap-beam::after { content: ""; position: absolute; inset: -7px 0; border-radius: inherit; background: linear-gradient(90deg, transparent, rgba(85,231,255,.35), rgba(255,103,200,.25)); filter: blur(6px); }
-    .zap-impact-ring { position: fixed; width: 32px; height: 32px; margin: -16px 0 0 -16px; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 0 12px #fff, 0 0 24px rgba(255,103,200,.95), 0 0 42px rgba(189,124,255,.85); opacity: 0; animation: zapImpact .7s .72s ease-out forwards; }
-    .zap-word { position: fixed; transform: translate(-50%, -50%) scale(.65); color: #fff; font-size: 23px; font-weight: 1000; letter-spacing: .08em; text-shadow: 0 0 8px #fff, 0 0 18px var(--pink), 0 0 30px var(--violet); opacity: 0; animation: zapWord .8s .77s ease-out forwards; }
+    .zap-impact-ring { position: fixed; width: 32px; height: 32px; margin: -16px 0 0 -16px; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 0 12px #fff, 0 0 24px rgba(255,103,200,.95), 0 0 42px rgba(189,124,255,.85); opacity: 0; animation: zapImpact .82s .95s ease-out forwards; }
+    .zap-word { position: fixed; transform: translate(-50%, -50%) scale(.65); color: #fff; font-size: 23px; font-weight: 1000; letter-spacing: .08em; text-shadow: 0 0 8px #fff, 0 0 18px var(--pink), 0 0 30px var(--violet); opacity: 0; animation: zapWord 1.05s 1s ease-out forwards; }
     .seat.zap-source { animation: zapSource .72s ease-out; }
-    .seat.zap-hit { animation: zapHit .78s .62s ease-out; }
+    .seat.zap-hit { animation: zapHit 1s .82s ease-out; }
     @keyframes zapCharge { 0% { opacity: 0; transform: scale(.2) rotate(0deg); } 35% { opacity: 1; } 100% { opacity: .95; transform: scale(1.2) rotate(180deg); } }
     @keyframes zapBeam { 0% { opacity: 0; transform: rotate(var(--zap-angle)) scaleX(0); } 12% { opacity: 1; } 78% { opacity: 1; transform: rotate(var(--zap-angle)) scaleX(1); } 100% { opacity: 0; transform: rotate(var(--zap-angle)) scaleX(1); } }
     @keyframes zapImpact { 0% { opacity: 0; transform: scale(.25); } 20% { opacity: 1; } 100% { opacity: 0; transform: scale(3.2); } }
@@ -201,9 +201,10 @@
     .zap-charge-ring.charged { width: 58px; height: 58px; margin: -29px 0 0 -29px; border-color: #ffe66a; box-shadow: 0 0 14px #ffe66a, inset 0 0 18px rgba(255,97,122,.9); }
 
     .card-fx-layer { position: fixed; inset: 0; z-index: 252; pointer-events: none; overflow: hidden; }
-    .fx-emoji { position: fixed; transform: translate(-50%, -50%); display: grid; place-items: center; font-size: 34px; filter: drop-shadow(0 6px 10px rgba(0,0,0,.55)); will-change: transform, opacity, filter; }
-    .fx-card-token { width: 34px; height: 46px; border-radius: 8px; border: 2px solid rgba(255,255,255,.9); background: linear-gradient(145deg, #768aff, #352d78); box-shadow: 0 0 14px rgba(85,231,255,.55), 0 8px 18px rgba(0,0,0,.45); }
-    .fx-label { position: fixed; transform: translate(-50%, -50%); color: #fff; font-size: 21px; font-weight: 1000; letter-spacing: .07em; text-shadow: 0 2px 4px #000, 0 0 12px var(--cyan), 0 0 24px var(--violet); white-space: nowrap; }
+    .fx-emoji { position: fixed; transform: translate(-50%, -50%); display: grid; place-items: center; font-size: 38px; filter: drop-shadow(0 6px 10px rgba(0,0,0,.62)); will-change: transform, opacity, filter; }
+    .fx-card-token { width: 42px; height: 56px; border-radius: 9px; border: 2px solid rgba(255,255,255,.95); background: linear-gradient(145deg, #768aff, #352d78); box-shadow: 0 0 18px rgba(85,231,255,.72), 0 9px 22px rgba(0,0,0,.5); }
+    .fx-label { position: fixed; transform: translate(-50%, -50%); color: #fff; font-size: clamp(21px, 6vw, 29px); font-weight: 1000; letter-spacing: .055em; text-shadow: 0 2px 5px #000, 0 0 14px var(--cyan), 0 0 28px var(--violet); white-space: nowrap; }
+    .fx-tether { position: fixed; height: 7px; border-radius: 999px; transform-origin: left center; background: repeating-linear-gradient(90deg, rgba(255,255,255,.98) 0 10px, rgba(255,103,200,.95) 10px 19px, rgba(85,231,255,.95) 19px 28px); box-shadow: 0 0 10px rgba(255,255,255,.8), 0 0 20px rgba(255,103,200,.72); opacity: 0; }
     .fx-ring { position: fixed; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; border: 4px solid var(--fx-color, #55e7ff); box-shadow: 0 0 12px var(--fx-color, #55e7ff), inset 0 0 10px var(--fx-color, #55e7ff); }
     .fx-vortex { position: fixed; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; background: radial-gradient(circle at 50% 50%, #02030a 0 22%, #6a42d8 38%, #151025 55%, transparent 72%); box-shadow: 0 0 22px rgba(189,124,255,.9), inset 0 0 20px rgba(0,0,0,.9); }
     .seat { min-height: 176px; display: flex; flex-direction: column; }
@@ -536,8 +537,8 @@
       shield: { name: "Deflector", icon: "🔷", type: "Defense", target: "automatic", glow: "rgba(85,231,255,.35)", desc: "Automatically blocks 1 incoming damage, then is discarded." },
       repair: { name: "Nano Repair", icon: "🧬", type: "Recovery", target: "self", glow: "rgba(98,243,169,.34)", desc: "Restore 1 health, up to your maximum." },
       overcharge: { name: "Overcharge", icon: "⚡", type: "Action", target: "self", glow: "rgba(255,217,106,.34)", desc: "Draw 2 additional cards. Galactic Show changes when this is played." },
-      rifle: { name: "Pulse Rifle", icon: "📡", type: "Equipment", target: "self", glow: "rgba(111,136,255,.36)", desc: "Equip a weapon with firing range 2." },
-      rail: { name: "Rail Driver", icon: "🌀", type: "Equipment", target: "self", glow: "rgba(189,124,255,.36)", desc: "Equip a weapon with firing range 3." },
+      rifle: { name: "Pulse Rifle", icon: "📡", type: "Equipment", target: "self", glow: "rgba(111,136,255,.36)", desc: "Set your firing range to 2. This replaces your current weapon; it does not add 2." },
+      rail: { name: "Rail Driver", icon: "🌀", type: "Equipment", target: "self", glow: "rgba(189,124,255,.36)", desc: "Set your firing range to 3. This replaces your current weapon; it does not add 3." },
       suit: { name: "Phase Suit", icon: "🥽", type: "Equipment", target: "self", glow: "rgba(85,231,255,.30)", desc: "Other players count you as 1 seat farther away." },
       tractor: { name: "Tractor Beam", icon: "🧲", type: "Action", target: "player", glow: "rgba(255,103,200,.34)", desc: "Steal one random card from a player at distance 1." },
       emp: { name: "EMP Spike", icon: "🔻", type: "Action", target: "player", glow: "rgba(255,217,106,.32)", desc: "Remove a random equipped item, or one random card, from a player in firing range." },
@@ -563,8 +564,8 @@
       shield: "Blocks 1 hit automatically.",
       repair: "+1 health.",
       overcharge: "Draw 2 cards.",
-      rifle: "Equip range 2.",
-      rail: "Equip range 3.",
+      rifle: "Set range to 2. Replaces weapon.",
+      rail: "Set range to 3. Replaces weapon.",
       suit: "You count 1 farther away.",
       tractor: "Pull 1 card from a nearby player.",
       emp: "Disable equipment or erase 1 card.",
@@ -627,7 +628,7 @@
     let mutationBusy = false;
     let lastAnimatedEffectId = null;
 
-    const BOT_ACTION_DISPLAY_MS = 10000;
+    const BOT_ACTION_DISPLAY_MS = 5000;
 
     function onlineConfigured() {
       return SUPABASE_URL.startsWith("https://") && !SUPABASE_URL.includes("YOUR_") && SUPABASE_KEY.length > 20 && !SUPABASE_KEY.includes("YOUR_");
@@ -1950,13 +1951,14 @@
       label.textContent = text;
       label.style.left = `${point.x}px`;
       label.style.top = `${point.y - 30}px`;
-      label.style.textShadow = `0 2px 4px #000, 0 0 12px ${color}, 0 0 24px ${color}`;
+      label.style.textShadow = `0 2px 5px #000, 0 0 14px ${color}, 0 0 28px ${color}`;
       layer.appendChild(label);
       label.animate([
-        { opacity: 0, transform: "translate(-50%, -35%) scale(.72)" },
-        { opacity: 1, transform: "translate(-50%, -65%) scale(1.08)", offset: .35 },
-        { opacity: 0, transform: "translate(-50%, -115%) scale(1.18)" }
-      ], { duration: 1050, delay, easing: "ease-out", fill: "forwards" });
+        { opacity: 0, transform: "translate(-50%, -30%) scale(.7)" },
+        { opacity: 1, transform: "translate(-50%, -62%) scale(1.08)", offset: .18 },
+        { opacity: 1, transform: "translate(-50%, -72%) scale(1.08)", offset: .72 },
+        { opacity: 0, transform: "translate(-50%, -118%) scale(1.2)" }
+      ], { duration: 1850, delay, easing: "ease-out", fill: "forwards" });
     }
 
     function addFxEmoji(layer, point, emoji, delay = 0, size = 36) {
@@ -1970,9 +1972,10 @@
       layer.appendChild(node);
       node.animate([
         { opacity: 0, transform: "translate(-50%, -50%) scale(.2) rotate(-20deg)" },
-        { opacity: 1, transform: "translate(-50%, -50%) scale(1.2) rotate(5deg)", offset: .35 },
-        { opacity: 0, transform: "translate(-50%, -85%) scale(1) rotate(14deg)" }
-      ], { duration: 1100, delay, easing: "ease-out", fill: "forwards" });
+        { opacity: 1, transform: "translate(-50%, -50%) scale(1.22) rotate(5deg)", offset: .22 },
+        { opacity: 1, transform: "translate(-50%, -56%) scale(1.1) rotate(-3deg)", offset: .72 },
+        { opacity: 0, transform: "translate(-50%, -95%) scale(1) rotate(14deg)" }
+      ], { duration: 1750, delay, easing: "ease-out", fill: "forwards" });
       return node;
     }
 
@@ -1987,10 +1990,33 @@
       const my = Math.min(from.y, to.y) - 68;
       card.animate([
         { opacity: 0, left: `${from.x}px`, top: `${from.y}px`, transform: `translate(-50%, -50%) scale(.65) rotate(${reverseTilt ? 12 : -12}deg)` },
-        { opacity: 1, left: `${mx}px`, top: `${my}px`, transform: `translate(-50%, -50%) scale(1.12) rotate(${reverseTilt ? -8 : 8}deg)`, offset: .48 },
-        { opacity: 1, left: `${to.x}px`, top: `${to.y}px`, transform: `translate(-50%, -50%) scale(.72) rotate(${reverseTilt ? -18 : 18}deg)`, offset: .88 },
+        { opacity: 1, left: `${from.x}px`, top: `${from.y}px`, transform: `translate(-50%, -50%) scale(1.05) rotate(${reverseTilt ? 12 : -12}deg)`, offset: .14 },
+        { opacity: 1, left: `${mx}px`, top: `${my}px`, transform: `translate(-50%, -50%) scale(1.2) rotate(${reverseTilt ? -8 : 8}deg)`, offset: .56 },
+        { opacity: 1, left: `${to.x}px`, top: `${to.y}px`, transform: `translate(-50%, -50%) scale(.86) rotate(${reverseTilt ? -18 : 18}deg)`, offset: .9 },
         { opacity: 0, left: `${to.x}px`, top: `${to.y}px`, transform: "translate(-50%, -50%) scale(.2)" }
-      ], { duration: 1150, delay, easing: "cubic-bezier(.2,.72,.18,1)", fill: "forwards" });
+      ], { duration: 1900, delay, easing: "cubic-bezier(.2,.72,.18,1)", fill: "forwards" });
+    }
+
+    function drawFxTether(layer, from, to, color = "#ff67c8", delay = 0) {
+      if (!from || !to) return;
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      const length = Math.hypot(dx, dy);
+      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+      const tether = document.createElement("div");
+      tether.className = "fx-tether";
+      tether.style.left = `${from.x}px`;
+      tether.style.top = `${from.y - 3.5}px`;
+      tether.style.width = `${length}px`;
+      tether.style.transform = `rotate(${angle}deg) scaleX(0)`;
+      tether.style.boxShadow = `0 0 10px rgba(255,255,255,.82), 0 0 22px ${color}`;
+      layer.appendChild(tether);
+      tether.animate([
+        { opacity: 0, transform: `rotate(${angle}deg) scaleX(0)` },
+        { opacity: .95, transform: `rotate(${angle}deg) scaleX(1)`, offset: .28 },
+        { opacity: .95, transform: `rotate(${angle}deg) scaleX(1)`, offset: .72 },
+        { opacity: 0, transform: `rotate(${angle}deg) scaleX(1)` }
+      ], { duration: 1800, delay, easing: "ease-out", fill: "forwards" });
     }
 
     function pulsePoint(layer, point, color = "#55e7ff", delay = 0, scale = 3.5) {
@@ -2003,15 +2029,16 @@
       layer.appendChild(ring);
       ring.animate([
         { opacity: 0, transform: "scale(.25)" },
-        { opacity: 1, transform: "scale(.75)", offset: .2 },
+        { opacity: 1, transform: "scale(.75)", offset: .18 },
+        { opacity: .82, transform: `scale(${Math.max(1.4, scale * .62)})`, offset: .68 },
         { opacity: 0, transform: `scale(${scale})` }
-      ], { duration: 900, delay, easing: "ease-out", fill: "forwards" });
+      ], { duration: 1500, delay, easing: "ease-out", fill: "forwards" });
     }
 
     function flashSeat(playerId, keyframes, options = {}) {
       const seat = seatFor(playerId);
       if (!seat) return;
-      seat.animate(keyframes, { duration: 900, easing: "ease-out", ...options });
+      seat.animate(keyframes, { duration: 1400, easing: "ease-out", ...options });
     }
 
     function showBlockedShields(layer, effect) {
@@ -2033,18 +2060,31 @@
       const target = centerOfSeat(effect.targetId);
       if (!source) return;
       const layer = makeFxLayer();
-      const cleanup = () => setTimeout(() => layer.remove(), 2100);
+      const cleanup = () => setTimeout(() => layer.remove(), 3300);
 
       switch (type) {
-        case "tractor":
-          addFxEmoji(layer, source, "🧲", 0, 45);
+        case "tractor": {
+          const middle = target ? { x: (source.x + target.x) / 2, y: (source.y + target.y) / 2 } : source;
+          addFxEmoji(layer, source, "🧲", 0, 58);
+          pulsePoint(layer, source, "#ff67c8", 100, 3.1);
           if (effect.success !== false && target) {
-            flyCard(layer, target, source, 170);
-            flyCard(layer, target, source, 300, true);
+            drawFxTether(layer, target, source, "#ff67c8", 160);
+            flyCard(layer, target, source, 260);
+            flashSeat(effect.targetId, [
+              { transform: "translateX(0)" },
+              { transform: "translateX(-7px)", offset: .3 },
+              { transform: "translateX(4px)", offset: .58 },
+              { transform: "translateX(0)" }
+            ], { duration: 1750 });
+            flashSeat(effect.sourceId, [
+              { filter: "brightness(1)" },
+              { filter: "brightness(1.45)", offset: .5 },
+              { filter: "brightness(1)" }
+            ], { duration: 1850 });
           }
-          addFxLabel(layer, source, effect.success === false ? "EMPTY" : "PULL!", "#ff67c8", 280);
-          flashSeat(effect.targetId, [{ transform: "translateX(0)" }, { transform: "translateX(-5px)" }, { transform: "translateX(0)" }]);
+          addFxLabel(layer, middle, effect.success === false ? "TRACTOR BEAM · EMPTY" : "TRACTOR BEAM · CARD PULLED", "#ff67c8", 340);
           break;
+        }
         case "swap":
           if (target) {
             flyCard(layer, source, target, 80);
@@ -2052,7 +2092,7 @@
             pulsePoint(layer, source, "#bd7cff", 420, 2.3);
             pulsePoint(layer, target, "#bd7cff", 420, 2.3);
           }
-          addFxLabel(layer, target || source, "SWAP!", "#bd7cff", 260);
+          addFxLabel(layer, target || source, "QUANTUM SWAP", "#bd7cff", 300);
           break;
         case "emp":
           addFxEmoji(layer, source, "🔻", 0, 42);
@@ -2068,7 +2108,7 @@
                 { opacity: 0, left: `${source.x}px`, top: `${source.y}px`, transform: "translate(-50%,-50%) scale(.45)" },
                 { opacity: 1, offset: .2 },
                 { opacity: 0, left: `${target.x + (i - 1) * 12}px`, top: `${target.y + (i % 2 ? 10 : -8)}px`, transform: "translate(-50%,-50%) scale(1.15)" }
-              ], { duration: 650, delay: i * 110, easing: "ease-in", fill: "forwards" });
+              ], { duration: 1100, delay: 100 + i * 170, easing: "ease-in", fill: "forwards" });
             });
             flashSeat(effect.targetId, [
               { filter: "brightness(1)", opacity: 1 },
@@ -2077,7 +2117,7 @@
               { filter: "brightness(1)", opacity: 1 }
             ], { duration: 1050 });
           }
-          addFxLabel(layer, target || source, "EMP!", "#ffd96a", 300);
+          addFxLabel(layer, target || source, "EMP SPIKE", "#ffd96a", 420);
           break;
         case "pulse":
           pulsePoint(layer, source, "#ff617a", 0, 2.3);
@@ -2085,7 +2125,7 @@
             pulsePoint(layer, target, "#ff617a", 240, 4.2);
             flashSeat(effect.targetId, [{ transform: "scale(1)" }, { transform: "scale(.96)" }, { transform: "scale(1.02)" }, { transform: "scale(1)" }]);
           }
-          addFxLabel(layer, target || source, "PULSE!", "#ff617a", 220);
+          addFxLabel(layer, target || source, "PULSE BURST", "#ff617a", 320);
           showBlockedShields(layer, effect);
           break;
         case "sweep":
@@ -2096,7 +2136,7 @@
             pulsePoint(layer, p, "#ff617a", 300 + i * 90, 2.8);
             flashSeat(id, [{ filter: "brightness(1)" }, { filter: "brightness(1.55)" }, { filter: "brightness(1)" }], { delay: 300 + i * 90 });
           });
-          addFxLabel(layer, source, "SYSTEM SWEEP!", "#ff617a", 240);
+          addFxLabel(layer, source, "SYSTEM SWEEP", "#ff617a", 340);
           showBlockedShields(layer, effect);
           break;
         case "rift": {
@@ -2109,14 +2149,14 @@
             { opacity: 0, transform: "scale(.1) rotate(0deg)" },
             { opacity: 1, transform: "scale(1.2) rotate(220deg)", offset: .5 },
             { opacity: 0, transform: "scale(2.7) rotate(520deg)" }
-          ], { duration: 1350, easing: "ease-in-out", fill: "forwards" });
+          ], { duration: 2100, easing: "ease-in-out", fill: "forwards" });
           (effect.targetIds || []).forEach((id, i) => flashSeat(id, [
             { transform: "translate(0,0)" },
             { transform: "translate(-4px,2px)" },
             { transform: "translate(4px,-2px)" },
             { transform: "translate(0,0)" }
           ], { delay: 300 + i * 70 }));
-          addFxLabel(layer, source, "VOID RIFT!", "#bd7cff", 250);
+          addFxLabel(layer, source, "VOID RIFT", "#bd7cff", 360);
           showBlockedShields(layer, effect);
           break;
         }
@@ -2125,7 +2165,7 @@
           const amount = effect.amount || (type === "reboot" ? 2 : 1);
           pulsePoint(layer, source, "#62f3a9", 0, 3.1);
           for (let i = 0; i < Math.max(2, amount + 1); i++) addFxEmoji(layer, { x: source.x + (i - 1) * 24, y: source.y + 10 }, "♥", i * 100, 30);
-          addFxLabel(layer, source, `+${amount} HEALTH`, "#62f3a9", 180);
+          addFxLabel(layer, source, `${type === "reboot" ? "EMERGENCY REBOOT" : "NANO REPAIR"} · +${amount} HEALTH`, "#62f3a9", 280);
           break;
         }
         case "overcharge":
@@ -2135,7 +2175,7 @@
             const end = { x: source.x + (i - 1.5) * 28, y: source.y - 50 - (i % 2) * 12 };
             flyCard(layer, source, end, 180 + i * 90, i % 2 === 0);
           }
-          addFxLabel(layer, source, `DRAW ${effect.amount || 2}!`, "#ffd96a", 220);
+          addFxLabel(layer, source, `OVERCHARGE · DRAW ${effect.amount || 2}`, "#ffd96a", 320);
           break;
         case "phase":
           addFxEmoji(layer, source, "🫥", 0, 48);
@@ -2145,19 +2185,19 @@
             { opacity: .8, transform: "translateX(-6px)", filter: "blur(1px)" },
             { opacity: 1, transform: "translateX(0)", filter: "blur(0)" }
           ], { duration: 1350 });
-          addFxLabel(layer, source, "PHASED", "#55e7ff", 240);
+          addFxLabel(layer, source, "PHASE SHIFT", "#55e7ff", 340);
           break;
         case "echo": {
           const from = { x: source.x, y: window.innerHeight + 35 };
           flyCard(layer, from, source, 0);
           addFxEmoji(layer, source, effect.icon || "🔂", 340, 39);
-          addFxLabel(layer, source, "RECOVERED!", "#bd7cff", 300);
+          addFxLabel(layer, source, "ECHO CACHE · RECOVERED", "#bd7cff", 420);
           break;
         }
         case "powerCell":
           addFxEmoji(layer, source, "🔋", 0, 49);
           pulsePoint(layer, source, "#ffd96a", 100, 3.2);
-          addFxLabel(layer, source, "+2 CHARGE", "#ffd96a", 220);
+          addFxLabel(layer, source, "POWER CELL · +2 CHARGE", "#ffd96a", 320);
           break;
         case "rifle":
         case "rail":
@@ -2165,9 +2205,9 @@
         case "drone":
         case "decoy":
         case "capacitor":
-          addFxEmoji(layer, source, effect.icon || "✦", 0, 50);
+          addFxEmoji(layer, source, effect.icon || "✦", 0, 54);
           pulsePoint(layer, source, type === "decoy" || type === "rail" ? "#bd7cff" : "#55e7ff", 100, 3);
-          addFxLabel(layer, source, type === "drone" ? "DEPLOYED" : type === "decoy" ? "DECOY ONLINE" : "EQUIPPED", "#55e7ff", 220);
+          addFxLabel(layer, source, (CARDS[type]?.name || "EQUIPMENT").replace(/[!?]+$/, "").toUpperCase(), "#55e7ff", 320);
           break;
         default:
           addFxEmoji(layer, source, effect.icon || "✦", 0, 46);
@@ -2223,7 +2263,7 @@
         layer.remove();
         sourceSeat.classList.remove("zap-source");
         targetSeat.classList.remove("zap-hit");
-      }, 1900);
+      }, 2450);
     }
 
     function renderGameOver() {
