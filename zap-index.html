@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#090d1d" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Zap" />
+  <title>Zap</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon-192.png" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #090d1d;
+      --panel: rgba(20, 27, 55, 0.92);
+      --panel2: rgba(31, 40, 77, 0.94);
+      --line: rgba(141, 163, 255, 0.25);
+      --text: #f6f7ff;
+      --muted: #aab2d5;
+      --cyan: #55e7ff;
+      --blue: #6f88ff;
+      --violet: #bd7cff;
+      --pink: #ff67c8;
+      --green: #62f3a9;
+      --yellow: #ffd96a;
+      --red: #ff617a;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); font-family: Inter, ui-rounded, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { min-height: 100dvh; overflow-x: hidden; }
+    button, input { font: inherit; }
+    button { border: 0; }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+    }
+    body::before {
+      background:
+        radial-gradient(circle at 15% 10%, rgba(85, 231, 255, .16), transparent 28%),
+        radial-gradient(circle at 85% 20%, rgba(189, 124, 255, .15), transparent 30%),
+        radial-gradient(circle at 50% 90%, rgba(255, 103, 200, .11), transparent 34%),
+        linear-gradient(180deg, #070a16 0%, #0c1126 60%, #090d1d 100%);
+    }
+    body::after {
+      opacity: .42;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,.8) 0 1px, transparent 1.5px),
+        radial-gradient(circle, rgba(85,231,255,.75) 0 1px, transparent 1.6px);
+      background-size: 57px 57px, 91px 91px;
+      background-position: 8px 12px, 31px 44px;
+    }
+
+    .app-shell { min-height: 100dvh; padding: max(14px, env(safe-area-inset-top)) 14px max(18px, env(safe-area-inset-bottom)); }
+    .screen { width: min(100%, 720px); margin: 0 auto; }
+    .hidden { display: none !important; }
+
+    .brand { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 16px 0 20px; }
+    .brand-mark { width: 46px; height: 46px; border-radius: 15px; display: grid; place-items: center; font-size: 25px; background: linear-gradient(145deg, rgba(85,231,255,.22), rgba(189,124,255,.23)); border: 1px solid rgba(117,233,255,.38); box-shadow: inset 0 0 22px rgba(85,231,255,.12), 0 0 28px rgba(85,231,255,.12); }
+    .brand h1 { font-size: clamp(31px, 10vw, 50px); letter-spacing: -.055em; line-height: .9; margin: 0; }
+    .brand h1 span { color: var(--cyan); text-shadow: 0 0 18px rgba(85,231,255,.46); }
+    .tagline { text-align: center; color: var(--muted); margin: -10px 0 24px; font-size: 14px; }
+
+    .panel { background: linear-gradient(180deg, rgba(29,38,74,.95), rgba(17,23,48,.95)); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; backdrop-filter: blur(15px); }
+    .panel + .panel { margin-top: 14px; }
+    .panel-title { margin: 0 0 4px; font-size: 20px; letter-spacing: -.02em; }
+    .panel-sub { margin: 0 0 16px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+
+    .field { display: grid; gap: 7px; margin-bottom: 12px; }
+    .field label { color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+    .field input { width: 100%; border-radius: 15px; border: 1px solid rgba(149,165,236,.26); color: var(--text); background: rgba(6,10,25,.64); padding: 14px 15px; outline: none; }
+    .field input:focus { border-color: rgba(85,231,255,.72); box-shadow: 0 0 0 3px rgba(85,231,255,.10); }
+    .field input::placeholder { color: #747ea8; }
+    .room-input { text-transform: uppercase; letter-spacing: .2em; font-weight: 900; }
+
+    .button-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn { min-height: 48px; flex: 1; border-radius: 15px; padding: 12px 16px; color: white; font-weight: 850; cursor: pointer; transition: transform .16s ease, filter .16s ease, opacity .16s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn:active { transform: translateY(1px) scale(.985); }
+    .btn:disabled { opacity: .42; cursor: not-allowed; filter: grayscale(.3); }
+    .btn-primary { background: linear-gradient(135deg, #476fff, #a25cf3); box-shadow: 0 10px 26px rgba(87,105,255,.24); }
+    .btn-cyan { color: #03121a; background: linear-gradient(135deg, #73f2ff, #4cc8ff); box-shadow: 0 10px 26px rgba(85,231,255,.19); }
+    .btn-soft { color: var(--text); background: rgba(121,139,217,.14); border: 1px solid rgba(149,165,236,.26); }
+    .btn-danger { background: rgba(255,97,122,.14); color: #ff9eac; border: 1px solid rgba(255,97,122,.35); }
+    .btn-small { min-height: 39px; flex: 0 0 auto; padding: 8px 12px; border-radius: 12px; font-size: 13px; }
+
+    .split-label { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: #7680a8; font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+    .split-label::before, .split-label::after { content: ""; height: 1px; background: rgba(145,159,218,.18); flex: 1; }
+
+    .notice { border-radius: 15px; padding: 12px 13px; font-size: 13px; line-height: 1.45; margin-top: 12px; }
+    .notice-warn { background: rgba(255,217,106,.09); border: 1px solid rgba(255,217,106,.25); color: #ffe8a8; }
+    .notice-info { background: rgba(85,231,255,.08); border: 1px solid rgba(85,231,255,.22); color: #c9f8ff; }
+    .error-text { min-height: 18px; margin-top: 10px; color: #ff9dad; font-size: 13px; text-align: center; }
+
+    .topbar { position: sticky; top: max(0px, env(safe-area-inset-top)); z-index: 30; margin: -14px -14px 12px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; background: rgba(8,12,27,.84); border-bottom: 1px solid rgba(141,163,255,.14); backdrop-filter: blur(18px); }
+    .topbar-logo { font-size: 20px; font-weight: 950; letter-spacing: -.04em; margin-right: auto; }
+    .topbar-logo span { color: var(--cyan); }
+    .room-pill, .status-pill { border-radius: 999px; padding: 7px 10px; background: rgba(105,123,202,.12); border: 1px solid rgba(141,163,255,.2); font-size: 11px; font-weight: 900; letter-spacing: .07em; }
+    .status-pill { display: flex; align-items: center; gap: 6px; letter-spacing: 0; color: var(--muted); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); box-shadow: 0 0 12px currentColor; }
+    .dot.live { background: var(--green); }
+    .dot.off { background: var(--red); }
+    .icon-btn { width: 38px; height: 38px; border-radius: 12px; color: var(--text); background: rgba(121,139,217,.13); border: 1px solid rgba(149,165,236,.2); cursor: pointer; }
+
+    .room-hero { text-align: center; padding: 18px 14px; }
+    .eyebrow { color: var(--cyan); font-weight: 900; text-transform: uppercase; letter-spacing: .13em; font-size: 11px; }
+    .code-display { font-size: clamp(36px, 14vw, 64px); letter-spacing: .16em; line-height: 1.1; font-weight: 950; margin: 5px 0 8px; padding-left: .16em; text-shadow: 0 0 24px rgba(85,231,255,.22); }
+    .room-help { color: var(--muted); font-size: 13px; }
+
+    .player-list { display: grid; gap: 9px; margin-top: 14px; }
+    .lobby-player { display: flex; align-items: center; gap: 11px; border-radius: 16px; padding: 11px 12px; background: rgba(7,11,28,.45); border: 1px solid rgba(141,163,255,.15); }
+    .avatar { width: 40px; height: 40px; border-radius: 14px; display: grid; place-items: center; font-size: 20px; background: linear-gradient(145deg, rgba(85,231,255,.18), rgba(189,124,255,.18)); border: 1px solid rgba(135,197,255,.24); flex: 0 0 auto; }
+    .player-main { min-width: 0; flex: 1; }
+    .player-name { font-weight: 850; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+    .player-meta { margin-top: 2px; color: var(--muted); font-size: 11px; }
+    .host-chip, .bot-chip { border-radius: 999px; padding: 5px 8px; font-size: 10px; font-weight: 900; }
+    .host-chip { background: rgba(255,217,106,.12); color: var(--yellow); border: 1px solid rgba(255,217,106,.25); }
+    .bot-chip { background: rgba(189,124,255,.12); color: #d9b4ff; border: 1px solid rgba(189,124,255,.25); }
+
+    .lobby-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+    .lobby-controls .wide { grid-column: 1 / -1; }
+
+    .role-banner { position: relative; overflow: hidden; border-radius: 20px; padding: 15px; margin-bottom: 12px; border: 1px solid rgba(141,163,255,.22); background: linear-gradient(135deg, rgba(34,44,84,.95), rgba(16,22,48,.95)); }
+    .role-banner::after { content: ""; position: absolute; width: 140px; height: 140px; right: -42px; top: -52px; border-radius: 50%; background: radial-gradient(circle, var(--role-glow, rgba(85,231,255,.2)), transparent 68%); }
+    .role-row { position: relative; z-index: 1; display: flex; gap: 12px; align-items: center; }
+    .role-icon { width: 54px; height: 54px; border-radius: 17px; display: grid; place-items: center; font-size: 28px; background: rgba(7,11,27,.52); border: 1px solid rgba(255,255,255,.12); }
+    .role-name { font-size: 19px; font-weight: 950; }
+    .role-goal { color: var(--muted); margin-top: 3px; font-size: 12px; line-height: 1.35; }
+
+    .turn-banner { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; padding: 10px 12px; border-radius: 15px; background: rgba(85,231,255,.075); border: 1px solid rgba(85,231,255,.18); }
+    .turn-banner strong { font-size: 14px; }
+    .turn-banner span { color: var(--muted); font-size: 11px; }
+
+    .table-label { margin: 15px 2px 8px; color: var(--muted); font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .12em; }
+    .players-table { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+    .seat { position: relative; min-width: 0; border-radius: 18px; padding: 11px; background: linear-gradient(180deg, rgba(27,35,69,.92), rgba(15,20,43,.92)); border: 1px solid rgba(141,163,255,.18); transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease; }
+    .seat.current { border-color: rgba(85,231,255,.7); box-shadow: 0 0 0 2px rgba(85,231,255,.08), 0 0 24px rgba(85,231,255,.12); }
+    .seat.you { background: linear-gradient(180deg, rgba(38,47,89,.96), rgba(19,25,52,.96)); }
+    .seat.dead { opacity: .48; filter: grayscale(.7); }
+    .seat.targetable { border-color: rgba(255,103,200,.63); cursor: pointer; animation: targetPulse 1.1s ease-in-out infinite alternate; }
+    @keyframes targetPulse { to { box-shadow: 0 0 22px rgba(255,103,200,.22); transform: translateY(-1px); } }
+    .seat-head { display: flex; align-items: center; gap: 8px; }
+    .seat-avatar { width: 35px; height: 35px; border-radius: 12px; display: grid; place-items: center; background: rgba(97,119,215,.15); border: 1px solid rgba(141,163,255,.18); }
+    .seat-title { min-width: 0; flex: 1; }
+    .seat-name { font-size: 13px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .seat-role { color: var(--muted); font-size: 10px; margin-top: 1px; }
+    .seat-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+    .mini-tag { border-radius: 999px; padding: 4px 7px; background: rgba(111,136,255,.12); border: 1px solid rgba(141,163,255,.16); color: #c9d0f6; font-size: 9px; font-weight: 800; }
+    .health { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 8px; min-height: 17px; }
+    .hp { font-size: 13px; filter: drop-shadow(0 0 5px rgba(255,97,122,.35)); }
+    .hp.empty { opacity: .18; filter: none; }
+    .hand-count { position: absolute; right: 9px; bottom: 8px; color: var(--muted); font-size: 10px; }
+
+    .log-box { margin-top: 10px; border-radius: 18px; background: rgba(7,11,27,.48); border: 1px solid rgba(141,163,255,.15); overflow: hidden; }
+    .log-current { padding: 12px 13px; font-size: 13px; line-height: 1.4; }
+    .log-current b { color: var(--cyan); }
+    .log-toggle { width: 100%; padding: 9px 12px; color: var(--muted); background: rgba(100,118,195,.08); border-top: 1px solid rgba(141,163,255,.12); font-size: 11px; cursor: pointer; }
+    .log-history { max-height: 180px; overflow: auto; padding: 4px 12px 10px; }
+    .log-entry { padding: 8px 0; color: var(--muted); border-bottom: 1px solid rgba(141,163,255,.08); font-size: 11px; line-height: 1.4; }
+
+    .hand-zone { margin-top: 12px; border-radius: 22px; padding: 13px; background: linear-gradient(180deg, rgba(31,40,77,.96), rgba(17,23,48,.98)); border: 1px solid rgba(141,163,255,.22); box-shadow: var(--shadow); }
+    .hand-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 9px; }
+    .hand-title { font-weight: 950; }
+    .hand-instruction { color: var(--muted); font-size: 11px; text-align: right; }
+    .cards { display: flex; gap: 9px; overflow-x: auto; padding: 2px 1px 9px; scroll-snap-type: x proximity; scrollbar-width: none; }
+    .cards::-webkit-scrollbar { display: none; }
+    .card { flex: 0 0 132px; min-height: 172px; scroll-snap-align: start; border-radius: 18px; padding: 11px; color: var(--text); text-align: left; cursor: pointer; position: relative; overflow: hidden; background: linear-gradient(155deg, rgba(60,74,132,.98), rgba(24,31,65,.98)); border: 1px solid rgba(171,185,255,.24); box-shadow: 0 10px 22px rgba(0,0,0,.22); }
+    .card::after { content: ""; position: absolute; width: 90px; height: 90px; border-radius: 50%; right: -35px; top: -30px; background: radial-gradient(circle, var(--card-glow, rgba(85,231,255,.22)), transparent 70%); }
+    .card.selected { border-color: rgba(85,231,255,.86); transform: translateY(-3px); box-shadow: 0 0 0 2px rgba(85,231,255,.09), 0 13px 25px rgba(0,0,0,.28); }
+    .card.disabled { opacity: .43; filter: grayscale(.35); }
+    .card-icon { position: relative; z-index: 1; font-size: 29px; }
+    .card-name { position: relative; z-index: 1; font-weight: 950; font-size: 14px; margin-top: 8px; }
+    .card-type { color: #c2caef; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .09em; margin-top: 2px; }
+    .card-desc { position: relative; z-index: 1; color: #d2d7f4; font-size: 10px; line-height: 1.35; margin-top: 10px; }
+    .empty-hand { width: 100%; text-align: center; color: var(--muted); padding: 28px 12px; font-size: 13px; }
+
+    .action-zone { display: grid; gap: 9px; margin-top: 7px; }
+    .target-strip { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; }
+    .target-strip::-webkit-scrollbar { display: none; }
+    .target-btn { flex: 0 0 auto; border-radius: 12px; padding: 9px 11px; color: #ffd7f0; background: rgba(255,103,200,.11); border: 1px solid rgba(255,103,200,.3); font-weight: 850; font-size: 11px; cursor: pointer; }
+    .play-row { display: grid; grid-template-columns: 1fr auto; gap: 9px; }
+    .end-btn { min-width: 112px; }
+
+    .game-over { margin-top: 12px; padding: 17px; border-radius: 20px; text-align: center; background: linear-gradient(145deg, rgba(83,68,156,.35), rgba(21,28,60,.95)); border: 1px solid rgba(189,124,255,.35); }
+    .game-over h2 { margin: 5px 0 6px; font-size: 25px; }
+    .game-over p { color: var(--muted); margin: 0 0 13px; font-size: 13px; }
+
+    .modal-backdrop { position: fixed; inset: 0; z-index: 100; display: grid; align-items: end; background: rgba(0,0,0,.62); backdrop-filter: blur(8px); padding: 14px; }
+    .modal { width: min(100%, 650px); max-height: 88dvh; overflow: auto; margin: 0 auto; border-radius: 25px 25px 18px 18px; background: linear-gradient(180deg, #202a52, #11172f); border: 1px solid rgba(150,168,245,.28); box-shadow: 0 -20px 60px rgba(0,0,0,.4); padding: 17px; }
+    .modal-head { position: sticky; top: -17px; background: rgba(29,38,75,.96); backdrop-filter: blur(14px); margin: -17px -17px 12px; padding: 15px 17px 12px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(141,163,255,.16); }
+    .modal-head h2 { margin: 0; font-size: 20px; flex: 1; }
+    .rules-section { margin: 16px 0; }
+    .rules-section h3 { color: var(--cyan); font-size: 14px; margin: 0 0 7px; }
+    .rules-section p, .rules-section li { color: #c2c8e8; font-size: 12px; line-height: 1.55; }
+    .rules-section ul { padding-left: 19px; margin: 7px 0; }
+    .role-grid, .card-guide { display: grid; gap: 8px; }
+    .guide-item { border-radius: 13px; padding: 10px; background: rgba(7,11,27,.38); border: 1px solid rgba(141,163,255,.12); }
+    .guide-item b { font-size: 12px; }
+    .guide-item span { display: block; color: var(--muted); font-size: 11px; margin-top: 3px; line-height: 1.4; }
+
+    .toast-stack { position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(calc(100% - 28px), 500px); display: grid; gap: 8px; z-index: 150; pointer-events: none; }
+    .toast { padding: 12px 14px; border-radius: 14px; color: white; background: rgba(23,31,62,.96); border: 1px solid rgba(141,163,255,.27); box-shadow: 0 12px 30px rgba(0,0,0,.35); font-size: 12px; text-align: center; animation: toastIn .2s ease; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } }
+
+    @media (min-width: 560px) {
+      .players-table { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      .home-grid .panel + .panel { margin-top: 0; }
+      .modal-backdrop { align-items: center; }
+      .modal { border-radius: 25px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <main id="homeScreen" class="screen">
+      <div class="brand">
+        <div class="brand-mark">✦</div>
+        <h1>Za<span>p</span></h1>
+      </div>
+      <p class="tagline">Trust carefully. Fire strategically.</p>
+
+      <div class="home-grid">
+        <section class="panel">
+          <h2 class="panel-title">Create a mission</h2>
+          <p class="panel-sub">Start a room, then give the four-letter code to everyone playing on their own phone.</p>
+          <div class="field">
+            <label for="createName">Your name</label>
+            <input id="createName" maxlength="18" autocomplete="nickname" placeholder="Captain Nova" />
+          </div>
+          <button id="createBtn" class="btn btn-cyan">✦ Create Room</button>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel-title">Join a mission</h2>
+          <p class="panel-sub">Enter the room code shown on the host’s screen.</p>
+          <div class="field">
+            <label for="joinName">Your name</label>
+            <input id="joinName" maxlength="18" autocomplete="nickname" placeholder="Orbit" />
+          </div>
+          <div class="field">
+            <label for="joinCode">Room code</label>
+            <input id="joinCode" class="room-input" maxlength="4" autocomplete="off" placeholder="STAR" />
+          </div>
+          <button id="joinBtn" class="btn btn-primary">↗ Join Room</button>
+        </section>
+      </div>
+
+      <div id="onlineNotice" class="notice notice-info hidden"></div>
+      <div id="homeError" class="error-text"></div>
+
+      <div class="split-label">or test it now</div>
+      <button id="practiceBtn" class="btn btn-soft">🤖 Practice Against 3 Bots</button>
+      <div class="button-row" style="margin-top:10px">
+        <button id="resumeBtn" class="btn btn-soft hidden">↻ Resume Last Room</button>
+        <button id="rulesHomeBtn" class="btn btn-soft">? How to Play</button>
+      </div>
+    </main>
+
+    <main id="lobbyScreen" class="screen hidden">
+      <header class="topbar">
+        <div class="topbar-logo">Za<span>p</span></div>
+        <div id="lobbyStatus" class="status-pill"><i class="dot"></i><span>Syncing</span></div>
+        <button class="icon-btn rules-btn" aria-label="How to play">?</button>
+        <button id="leaveLobbyBtn" class="icon-btn" aria-label="Leave room">×</button>
+      </header>
+
+      <section class="panel room-hero">
+        <div class="eyebrow">Mission room</div>
+        <div id="lobbyCode" class="code-display">----</div>
+        <div class="room-help">Share this code. Every player joins on their own phone.</div>
+        <button id="copyCodeBtn" class="btn btn-soft btn-small" style="margin-top:12px">Copy Code</button>
+      </section>
+
+      <section class="panel">
+        <h2 class="panel-title">Crew <span id="playerCount" style="color:var(--muted);font-size:14px"></span></h2>
+        <p id="lobbyMessage" class="panel-sub">Four to seven players are needed.</p>
+        <div id="lobbyPlayers" class="player-list"></div>
+        <div id="hostControls" class="lobby-controls hidden">
+          <button id="addBotBtn" class="btn btn-soft">＋ Add Bot</button>
+          <button id="removeBotBtn" class="btn btn-soft">− Remove Bot</button>
+          <button id="startGameBtn" class="btn btn-cyan wide">Launch Mission</button>
+        </div>
+        <div id="guestWaiting" class="notice notice-info hidden">Waiting for the host to launch the mission.</div>
+      </section>
+    </main>
+
+    <main id="gameScreen" class="screen hidden">
+      <header class="topbar">
+        <div class="topbar-logo">Za<span>p</span></div>
+        <div id="gameRoomPill" class="room-pill">----</div>
+        <div id="gameStatus" class="status-pill"><i class="dot"></i><span>Syncing</span></div>
+        <button class="icon-btn rules-btn" aria-label="How to play">?</button>
+      </header>
+
+      <section id="myRoleBanner" class="role-banner"></section>
+      <section id="turnBanner" class="turn-banner"></section>
+
+      <div class="table-label">Crew status</div>
+      <section id="playersTable" class="players-table"></section>
+
+      <section class="log-box">
+        <div id="currentLog" class="log-current">Mission initialized.</div>
+        <button id="logToggle" class="log-toggle">Show mission history</button>
+        <div id="logHistory" class="log-history hidden"></div>
+      </section>
+
+      <section id="gameOverBox" class="game-over hidden"></section>
+
+      <section class="hand-zone">
+        <div class="hand-head">
+          <div class="hand-title">Your cards <span id="handCount" style="color:var(--muted);font-size:12px"></span></div>
+          <div id="handInstruction" class="hand-instruction">Wait for your turn</div>
+        </div>
+        <div id="cards" class="cards"></div>
+        <div class="action-zone">
+          <div id="targetStrip" class="target-strip hidden"></div>
+          <div class="play-row">
+            <button id="playCardBtn" class="btn btn-primary" disabled>Select a card</button>
+            <button id="endTurnBtn" class="btn btn-soft end-btn" disabled>End Turn</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="rulesModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+    <section class="modal">
+      <header class="modal-head">
+        <h2 id="rulesTitle">How to Play</h2>
+        <button id="closeRulesBtn" class="icon-btn" aria-label="Close rules">×</button>
+      </header>
+      <div class="rules-section">
+        <h3>The mission</h3>
+        <p>Zap is a 4–7 player hidden-role space battle. Each person plays on their own phone. The Commander is public; every other role stays secret until that player is eliminated.</p>
+      </div>
+      <div class="rules-section">
+        <h3>Secret roles</h3>
+        <div class="role-grid">
+          <div class="guide-item"><b>🪐 Commander</b><span>Stay alive and eliminate every Raider and the Rogue Unit.</span></div>
+          <div class="guide-item"><b>🛡️ Sentinel</b><span>Secretly protect the Commander. You share the Commander’s victory.</span></div>
+          <div class="guide-item"><b>☄️ Raider</b><span>Eliminate the Commander. Raiders win together unless the Rogue is the only survivor.</span></div>
+          <div class="guide-item"><b>🤖 Rogue Unit</b><span>Become the final surviving player.</span></div>
+        </div>
+      </div>
+      <div class="rules-section">
+        <h3>Your turn</h3>
+        <ul>
+          <li>You automatically draw two cards.</li>
+          <li>Play as many cards as you want, but only one Zap attack per turn.</li>
+          <li>Your normal firing range is 1 seat. Weapons increase it.</li>
+          <li>End your turn when finished. Extra cards above your current health are automatically discarded.</li>
+        </ul>
+      </div>
+      <div class="rules-section">
+        <h3>Cards</h3>
+        <div id="rulesCards" class="card-guide"></div>
+      </div>
+      <div class="rules-section">
+        <h3>Eliminations</h3>
+        <p>A Deflector in your hand automatically blocks one point of damage. Eliminating a Raider earns three cards. If the Commander accidentally eliminates a Sentinel, the Commander loses every card and equipped item.</p>
+      </div>
+    </section>
+  </div>
+
+  <div id="toastStack" class="toast-stack"></div>
+
+  <script>
+  (() => {
+    "use strict";
+
+    /* =========================================================
+       ZAP CONFIGURATION
+       Replace these two values with the URL and publishable/anon
+       key from your Supabase project before uploading to GitHub.
+       ========================================================= */
+    const SUPABASE_URL = "https://ghnuahsovbpyzrjvbylp.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_1Z7ddDl3qiL-8LRLhtML8Q_EOyJs6E2";
+
+    const TABLE_NAME = "pew_pew_rooms";
+    const MAX_PLAYERS = 7;
+    const MIN_PLAYERS = 4;
+    const BOT_NAMES = ["Zed-9", "Luma", "Quasar", "Pip", "Astro", "Vega", "Comet", "Byte"];
+    const AVATARS = ["🧑‍🚀", "👩‍🚀", "🛸", "🤖", "👾", "🛰️", "🌌", "🔭"];
+
+    const ROLE_INFO = {
+      commander: { name: "Commander", icon: "🪐", color: "rgba(85,231,255,.32)", goal: "Stay alive. Eliminate all Raiders and the Rogue Unit." },
+      sentinel: { name: "Sentinel", icon: "🛡️", color: "rgba(98,243,169,.30)", goal: "Secretly protect the Commander and eliminate every enemy." },
+      raider: { name: "Raider", icon: "☄️", color: "rgba(255,97,122,.30)", goal: "Work with the other Raiders to eliminate the Commander." },
+      rogue: { name: "Rogue Unit", icon: "🤖", color: "rgba(189,124,255,.32)", goal: "Become the final surviving player." }
+    };
+
+    const CARDS = {
+      zap: { name: "Zap!", icon: "💥", type: "Attack", target: "player", glow: "rgba(255,97,122,.35)", desc: "Deal 1 damage to a player within firing range. One per turn." },
+      shield: { name: "Deflector", icon: "🔷", type: "Defense", target: "automatic", glow: "rgba(85,231,255,.35)", desc: "Automatically blocks 1 incoming damage, then is discarded." },
+      repair: { name: "Nano Repair", icon: "🧬", type: "Recovery", target: "self", glow: "rgba(98,243,169,.34)", desc: "Restore 1 health, up to your maximum." },
+      overcharge: { name: "Overcharge", icon: "⚡", type: "Action", target: "self", glow: "rgba(255,217,106,.34)", desc: "Draw 2 additional cards." },
+      rifle: { name: "Pulse Rifle", icon: "📡", type: "Equipment", target: "self", glow: "rgba(111,136,255,.36)", desc: "Equip a weapon with firing range 2." },
+      rail: { name: "Rail Driver", icon: "🌀", type: "Equipment", target: "self", glow: "rgba(189,124,255,.36)", desc: "Equip a weapon with firing range 3." },
+      suit: { name: "Phase Suit", icon: "🥽", type: "Equipment", target: "self", glow: "rgba(85,231,255,.30)", desc: "Other players count you as 1 seat farther away." },
+      tractor: { name: "Tractor Beam", icon: "🧲", type: "Action", target: "player", glow: "rgba(255,103,200,.34)", desc: "Steal one random card from a player at distance 1." },
+      emp: { name: "EMP Spike", icon: "🔻", type: "Action", target: "player", glow: "rgba(255,217,106,.32)", desc: "Remove a random equipped item, or one random card, from a player in firing range." },
+      sweep: { name: "System Sweep", icon: "🌐", type: "Attack", target: "all", glow: "rgba(255,97,122,.30)", desc: "Deal 1 damage to every other living player. Deflectors still work." }
+    };
+
+    const DECK_COUNTS = {
+      zap: 24,
+      shield: 15,
+      repair: 8,
+      overcharge: 6,
+      rifle: 4,
+      rail: 2,
+      suit: 3,
+      tractor: 3,
+      emp: 3,
+      sweep: 2
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const els = {
+      home: $("homeScreen"), lobby: $("lobbyScreen"), game: $("gameScreen"),
+      createName: $("createName"), joinName: $("joinName"), joinCode: $("joinCode"),
+      createBtn: $("createBtn"), joinBtn: $("joinBtn"), practiceBtn: $("practiceBtn"), resumeBtn: $("resumeBtn"),
+      homeError: $("homeError"), onlineNotice: $("onlineNotice"),
+      lobbyCode: $("lobbyCode"), playerCount: $("playerCount"), lobbyPlayers: $("lobbyPlayers"), lobbyMessage: $("lobbyMessage"),
+      hostControls: $("hostControls"), guestWaiting: $("guestWaiting"), addBotBtn: $("addBotBtn"), removeBotBtn: $("removeBotBtn"), startGameBtn: $("startGameBtn"),
+      lobbyStatus: $("lobbyStatus"), gameStatus: $("gameStatus"), gameRoomPill: $("gameRoomPill"),
+      myRoleBanner: $("myRoleBanner"), turnBanner: $("turnBanner"), playersTable: $("playersTable"),
+      currentLog: $("currentLog"), logToggle: $("logToggle"), logHistory: $("logHistory"),
+      cards: $("cards"), handCount: $("handCount"), handInstruction: $("handInstruction"), targetStrip: $("targetStrip"), playCardBtn: $("playCardBtn"), endTurnBtn: $("endTurnBtn"),
+      gameOverBox: $("gameOverBox"), rulesModal: $("rulesModal"), rulesCards: $("rulesCards"), toastStack: $("toastStack")
+    };
+
+    let client = null;
+    let channel = null;
+    let roomCode = null;
+    let roomVersion = 0;
+    let state = null;
+    let me = null;
+    let selectedCardUid = null;
+    let selectedTargetId = null;
+    let practiceMode = false;
+    let botTimer = null;
+    let realtimeReady = false;
+    let mutationBusy = false;
+
+    function onlineConfigured() {
+      return SUPABASE_URL.startsWith("https://") && !SUPABASE_URL.includes("YOUR_") && SUPABASE_KEY.length > 20 && !SUPABASE_KEY.includes("YOUR_");
+    }
+
+    function safeText(value, max = 30) {
+      return String(value ?? "").replace(/[<>]/g, "").trim().slice(0, max);
+    }
+
+    function randomId(prefix = "id") {
+      if (crypto?.randomUUID) return `${prefix}_${crypto.randomUUID()}`;
+      return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+    }
+
+    function randomCode() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let out = "";
+      for (let i = 0; i < 4; i++) out += chars[Math.floor(Math.random() * chars.length)];
+      return out;
+    }
+
+    function deepClone(value) { return JSON.parse(JSON.stringify(value)); }
+
+    function shuffle(array) {
+      const a = [...array];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function takeRandom(array) {
+      if (!array.length) return null;
+      const index = Math.floor(Math.random() * array.length);
+      return array.splice(index, 1)[0];
+    }
+
+    function createPlayer(name, bot = false, seat = 0) {
+      return {
+        id: randomId(bot ? "bot" : "player"),
+        token: randomId("token"),
+        name: safeText(name, 18) || (bot ? "Bot" : "Player"),
+        bot,
+        seat,
+        avatar: AVATARS[seat % AVATARS.length],
+        role: null,
+        roleRevealed: false,
+        alive: true,
+        hp: 0,
+        maxHp: 0,
+        hand: [],
+        equipment: { weapon: null, suit: false }
+      };
+    }
+
+    function makeLobby(code, creator) {
+      return {
+        schema: 1,
+        code,
+        phase: "lobby",
+        hostId: creator.id,
+        players: [creator],
+        deck: [],
+        discard: [],
+        turn: null,
+        logs: [{ id: randomId("log"), text: `${creator.name} opened the mission room.`, at: Date.now() }],
+        winner: null,
+        createdAt: Date.now()
+      };
+    }
+
+    function addLog(s, text) {
+      s.logs = s.logs || [];
+      s.logs.unshift({ id: randomId("log"), text, at: Date.now() });
+      if (s.logs.length > 80) s.logs.length = 80;
+    }
+
+    function playerById(s, id) { return s.players.find(p => p.id === id); }
+    function myPlayer() { return state && me ? playerById(state, me.id) : null; }
+    function isHost() { return state && me && state.hostId === me.id; }
+    function currentPlayer(s = state) { return s?.turn ? playerById(s, s.turn.playerId) : null; }
+    function isMyTurn() { const p = currentPlayer(); return !!(p && me && p.id === me.id && state.phase === "playing" && p.alive); }
+
+    function identityKey(code) { return `zap_identity_${code}`; }
+    function saveIdentity(code, player) {
+      me = { id: player.id, token: player.token, name: player.name };
+      localStorage.setItem(identityKey(code), JSON.stringify(me));
+      localStorage.setItem("zap_last_room", code);
+      localStorage.setItem("zap_last_name", player.name);
+    }
+    function loadIdentity(code) {
+      try { return JSON.parse(localStorage.getItem(identityKey(code)) || "null"); } catch { return null; }
+    }
+
+    function setStatus(el, mode, text) {
+      if (!el) return;
+      const dot = el.querySelector(".dot");
+      const span = el.querySelector("span");
+      dot.className = `dot ${mode === "live" ? "live" : mode === "off" ? "off" : ""}`;
+      span.textContent = text;
+    }
+
+    function showScreen(name) {
+      els.home.classList.toggle("hidden", name !== "home");
+      els.lobby.classList.toggle("hidden", name !== "lobby");
+      els.game.classList.toggle("hidden", name !== "game");
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+
+    function toast(text) {
+      const item = document.createElement("div");
+      item.className = "toast";
+      item.textContent = text;
+      els.toastStack.appendChild(item);
+      setTimeout(() => item.remove(), 2600);
+    }
+
+    function showHomeError(text = "") { els.homeError.textContent = text; }
+
+    function initClient() {
+      if (!onlineConfigured()) return false;
+      try {
+        client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+          auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+        });
+        return true;
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
+    }
+
+    async function fetchRoom(code) {
+      const { data, error } = await client.from(TABLE_NAME).select("code,state,version").eq("code", code).maybeSingle();
+      if (error) throw error;
+      return data;
+    }
+
+    async function createOnlineRoom(name) {
+      showHomeError("");
+      const playerName = safeText(name, 18);
+      if (!playerName) return showHomeError("Enter your name first.");
+      if (!client) return showHomeError("Online play is not configured yet. Practice mode is ready to use.");
+      els.createBtn.disabled = true;
+      try {
+        let created = null;
+        for (let attempt = 0; attempt < 8 && !created; attempt++) {
+          const code = randomCode();
+          const player = createPlayer(playerName, false, 0);
+          const lobby = makeLobby(code, player);
+          const { data, error } = await client.from(TABLE_NAME).insert({ code, state: lobby, version: 1 }).select("code,state,version").single();
+          if (!error) created = { data, player };
+          else if (error.code !== "23505") throw error;
+        }
+        if (!created) throw new Error("Could not create a unique room code.");
+        practiceMode = false;
+        roomCode = created.data.code;
+        roomVersion = created.data.version;
+        state = created.data.state;
+        saveIdentity(roomCode, created.player);
+        await subscribeRoom();
+        render();
+      } catch (error) {
+        console.error(error);
+        showHomeError(friendlyError(error));
+      } finally {
+        els.createBtn.disabled = false;
+      }
+    }
+
+    async function joinOnlineRoom(codeInput, nameInput) {
+      showHomeError("");
+      const code = safeText(codeInput, 4).toUpperCase();
+      const playerName = safeText(nameInput, 18);
+      if (!playerName) return showHomeError("Enter your name first.");
+      if (code.length !== 4) return showHomeError("Enter the four-letter room code.");
+      if (!client) return showHomeError("Online play is not configured yet. Practice mode is ready to use.");
+      els.joinBtn.disabled = true;
+      try {
+        const existingIdentity = loadIdentity(code);
+        const row = await fetchRoom(code);
+        if (!row) throw new Error("That room could not be found.");
+        const existingPlayer = existingIdentity && playerById(row.state, existingIdentity.id);
+        if (existingPlayer && existingPlayer.token === existingIdentity.token) {
+          practiceMode = false;
+          roomCode = code;
+          roomVersion = row.version;
+          state = row.state;
+          me = existingIdentity;
+          localStorage.setItem("zap_last_room", code);
+          await subscribeRoom();
+          render();
+          return;
+        }
+        if (row.state.phase !== "lobby") throw new Error("That mission has already launched.");
+        if (row.state.players.length >= MAX_PLAYERS) throw new Error("That room is full.");
+        const player = createPlayer(playerName, false, row.state.players.length);
+        const updated = await mutateOnline(code, null, (s) => {
+          if (s.phase !== "lobby") throw new Error("That mission has already launched.");
+          if (s.players.length >= MAX_PLAYERS) throw new Error("That room is full.");
+          player.seat = s.players.length;
+          player.avatar = AVATARS[player.seat % AVATARS.length];
+          s.players.push(player);
+          addLog(s, `${player.name} joined the crew.`);
+        });
+        practiceMode = false;
+        roomCode = code;
+        state = updated.state;
+        roomVersion = updated.version;
+        saveIdentity(code, player);
+        await subscribeRoom();
+        render();
+      } catch (error) {
+        console.error(error);
+        showHomeError(friendlyError(error));
+      } finally {
+        els.joinBtn.disabled = false;
+      }
+    }
+
+    async function resumeLastRoom() {
+      const code = localStorage.getItem("zap_last_room");
+      if (!code || !client) return;
+      const identity = loadIdentity(code);
+      if (!identity) return;
+      try {
+        const row = await fetchRoom(code);
+        if (!row) throw new Error("That room no longer exists.");
+        const p = playerById(row.state, identity.id);
+        if (!p || p.token !== identity.token) throw new Error("Your seat is no longer in that room.");
+        practiceMode = false;
+        roomCode = code;
+        roomVersion = row.version;
+        state = row.state;
+        me = identity;
+        await subscribeRoom();
+        render();
+      } catch (error) {
+        toast(friendlyError(error));
+        localStorage.removeItem("zap_last_room");
+        updateResumeButton();
+      }
+    }
+
+    async function subscribeRoom() {
+      if (!client || !roomCode) return;
+      if (channel) await client.removeChannel(channel);
+      realtimeReady = false;
+      setStatus(els.lobbyStatus, "wait", "Syncing");
+      setStatus(els.gameStatus, "wait", "Syncing");
+      channel = client
+        .channel(`zap-${roomCode}-${randomId("c")}`)
+        .on("postgres_changes", { event: "UPDATE", schema: "public", table: TABLE_NAME, filter: `code=eq.${roomCode}` }, (payload) => {
+          if (!payload.new || payload.new.version < roomVersion) return;
+          roomVersion = payload.new.version;
+          state = payload.new.state;
+          selectedCardUid = null;
+          selectedTargetId = null;
+          render();
+        })
+        .on("postgres_changes", { event: "DELETE", schema: "public", table: TABLE_NAME, filter: `code=eq.${roomCode}` }, () => {
+          toast("The room was closed.");
+          leaveToHome(false);
+        })
+        .subscribe((status) => {
+          realtimeReady = status === "SUBSCRIBED";
+          const mode = realtimeReady ? "live" : status === "CHANNEL_ERROR" || status === "TIMED_OUT" ? "off" : "wait";
+          const text = realtimeReady ? "Live" : mode === "off" ? "Offline" : "Syncing";
+          setStatus(els.lobbyStatus, mode, text);
+          setStatus(els.gameStatus, mode, text);
+        });
+    }
+
+    async function mutateOnline(code, identity, mutator, maxRetries = 6) {
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        const row = await fetchRoom(code);
+        if (!row) throw new Error("Room not found.");
+        if (identity) {
+          const actor = playerById(row.state, identity.id);
+          if (!actor || actor.token !== identity.token) throw new Error("Your seat could not be verified.");
+        }
+        const next = deepClone(row.state);
+        mutator(next, row.state);
+        const newVersion = row.version + 1;
+        const { data, error } = await client
+          .from(TABLE_NAME)
+          .update({ state: next, version: newVersion, updated_at: new Date().toISOString() })
+          .eq("code", code)
+          .eq("version", row.version)
+          .select("code,state,version")
+          .maybeSingle();
+        if (error) throw error;
+        if (data) return data;
+        await new Promise(resolve => setTimeout(resolve, 80 + Math.random() * 160));
+      }
+      throw new Error("The room changed at the same time. Please try again.");
+    }
+
+    async function mutate(mutator, options = {}) {
+      if (mutationBusy && !options.bot) return;
+      mutationBusy = true;
+      try {
+        if (practiceMode) {
+          const next = deepClone(state);
+          mutator(next, state);
+          state = next;
+          roomVersion++;
+          selectedCardUid = null;
+          selectedTargetId = null;
+          render();
+          return;
+        }
+        const data = await mutateOnline(roomCode, me, mutator);
+        roomVersion = data.version;
+        state = data.state;
+        selectedCardUid = null;
+        selectedTargetId = null;
+        render();
+      } catch (error) {
+        console.error(error);
+        toast(friendlyError(error));
+      } finally {
+        mutationBusy = false;
+      }
+    }
+
+    function friendlyError(error) {
+      const msg = safeText(error?.message || error || "Something went wrong.", 180);
+      if (/relation .* does not exist/i.test(msg)) return "Run the included Supabase setup SQL first.";
+      if (/Failed to fetch|NetworkError/i.test(msg)) return "Could not reach Supabase. Check the project URL and connection.";
+      return msg || "Something went wrong.";
+    }
+
+    async function createPractice() {
+      const playerName = safeText(els.createName.value || els.joinName.value || localStorage.getItem("zap_last_name") || "You", 18);
+      const human = createPlayer(playerName, false, 0);
+      const bots = [0, 1, 2].map((_, i) => createPlayer(BOT_NAMES[i], true, i + 1));
+      practiceMode = true;
+      roomCode = "SOLO";
+      roomVersion = 1;
+      state = makeLobby(roomCode, human);
+      state.players.push(...bots);
+      me = { id: human.id, token: human.token, name: human.name };
+      startGameState(state);
+      render();
+      toast("Practice mission launched.");
+    }
+
+    function roleDeckFor(count) {
+      const map = {
+        4: ["commander", "raider", "raider", "rogue"],
+        5: ["commander", "sentinel", "raider", "raider", "rogue"],
+        6: ["commander", "sentinel", "raider", "raider", "raider", "rogue"],
+        7: ["commander", "sentinel", "sentinel", "raider", "raider", "raider", "rogue"]
+      };
+      return shuffle(map[count] || []);
+    }
+
+    function buildDeck() {
+      const deck = [];
+      Object.entries(DECK_COUNTS).forEach(([type, count]) => {
+        for (let i = 0; i < count; i++) deck.push({ uid: randomId("card"), type });
+      });
+      return shuffle(deck);
+    }
+
+    function drawCard(s) {
+      if (!s.deck.length && s.discard.length) {
+        s.deck = shuffle(s.discard.map(card => ({ ...card, uid: randomId("card") })));
+        s.discard = [];
+        addLog(s, "The discard pile was recycled into the draw deck.");
+      }
+      return s.deck.pop() || null;
+    }
+
+    function drawCards(s, player, amount) {
+      for (let i = 0; i < amount; i++) {
+        const card = drawCard(s);
+        if (card) player.hand.push(card);
+      }
+    }
+
+    function startGameState(s) {
+      if (s.phase !== "lobby") throw new Error("The mission has already launched.");
+      if (s.players.length < MIN_PLAYERS || s.players.length > MAX_PLAYERS) throw new Error("Zap needs 4 to 7 players.");
+      s.players.forEach((p, i) => {
+        p.seat = i;
+        p.avatar = AVATARS[i % AVATARS.length];
+      });
+      const roles = roleDeckFor(s.players.length);
+      s.deck = buildDeck();
+      s.discard = [];
+      s.winner = null;
+      s.players.forEach((p, i) => {
+        p.role = roles[i];
+        p.roleRevealed = p.role === "commander";
+        p.alive = true;
+        p.maxHp = p.role === "commander" ? 5 : 4;
+        p.hp = p.maxHp;
+        p.hand = [];
+        p.equipment = { weapon: null, suit: false };
+        drawCards(s, p, p.maxHp);
+      });
+      s.phase = "playing";
+      const commander = s.players.find(p => p.role === "commander");
+      s.turn = { playerId: commander.id, number: 1, attacksUsed: 0 };
+      addLog(s, `${commander.name} is the Commander. The mission begins!`);
+      beginTurn(s, commander.id, true);
+    }
+
+    function beginTurn(s, playerId, first = false) {
+      const p = playerById(s, playerId);
+      if (!p || !p.alive) return;
+      if (!first) s.turn.number += 1;
+      s.turn.playerId = p.id;
+      s.turn.attacksUsed = 0;
+      drawCards(s, p, 2);
+      addLog(s, `${p.name} began turn ${s.turn.number} and drew 2 cards.`);
+    }
+
+    function nextLivingPlayer(s, fromId) {
+      const alive = s.players.filter(p => p.alive);
+      if (!alive.length) return null;
+      const from = playerById(s, fromId);
+      const startSeat = from ? from.seat : -1;
+      for (let step = 1; step <= s.players.length; step++) {
+        const seat = (startSeat + step) % s.players.length;
+        const candidate = s.players.find(p => p.seat === seat && p.alive);
+        if (candidate) return candidate;
+      }
+      return alive[0];
+    }
+
+    function weaponRange(player) {
+      if (player.equipment.weapon === "rail") return 3;
+      if (player.equipment.weapon === "rifle") return 2;
+      return 1;
+    }
+
+    function distanceBetween(s, sourceId, targetId) {
+      const alive = s.players.filter(p => p.alive).sort((a, b) => a.seat - b.seat);
+      const a = alive.findIndex(p => p.id === sourceId);
+      const b = alive.findIndex(p => p.id === targetId);
+      if (a < 0 || b < 0) return 99;
+      const raw = Math.abs(a - b);
+      const circular = Math.min(raw, alive.length - raw);
+      const target = alive[b];
+      return circular + (target.equipment.suit ? 1 : 0);
+    }
+
+    function discardCard(s, card) { if (card) s.discard.push(card); }
+
+    function removeCardFromHand(player, uid) {
+      const index = player.hand.findIndex(c => c.uid === uid);
+      if (index < 0) return null;
+      return player.hand.splice(index, 1)[0];
+    }
+
+    function consumeShield(s, target) {
+      const index = target.hand.findIndex(c => c.type === "shield");
+      if (index < 0) return false;
+      const [shield] = target.hand.splice(index, 1);
+      discardCard(s, shield);
+      addLog(s, `${target.name}'s Deflector absorbed the hit.`);
+      return true;
+    }
+
+    function resolveDamage(s, source, target, amount, label) {
+      if (!target.alive) return;
+      for (let i = 0; i < amount; i++) {
+        if (consumeShield(s, target)) continue;
+        target.hp -= 1;
+        addLog(s, `${source.name} hit ${target.name} with ${label}. ${target.name} has ${Math.max(0, target.hp)} health.`);
+        if (target.hp <= 0) {
+          eliminatePlayer(s, source, target);
+          break;
+        }
+      }
+    }
+
+    function eliminatePlayer(s, source, target) {
+      target.hp = 0;
+      target.alive = false;
+      target.roleRevealed = true;
+      target.hand.forEach(card => discardCard(s, card));
+      target.hand = [];
+      if (target.equipment.weapon) discardCard(s, { uid: randomId("card"), type: target.equipment.weapon });
+      if (target.equipment.suit) discardCard(s, { uid: randomId("card"), type: "suit" });
+      target.equipment = { weapon: null, suit: false };
+      const roleName = ROLE_INFO[target.role].name;
+      addLog(s, `${target.name} was eliminated and revealed as ${roleName}.`);
+
+      if (source && source.alive && source.id !== target.id) {
+        if (target.role === "raider") {
+          drawCards(s, source, 3);
+          addLog(s, `${source.name} earned 3 cards for eliminating a Raider.`);
+        }
+        if (source.role === "commander" && target.role === "sentinel") {
+          source.hand.forEach(card => discardCard(s, card));
+          source.hand = [];
+          if (source.equipment.weapon) discardCard(s, { uid: randomId("card"), type: source.equipment.weapon });
+          if (source.equipment.suit) discardCard(s, { uid: randomId("card"), type: "suit" });
+          source.equipment = { weapon: null, suit: false };
+          addLog(s, `${source.name} lost every card for eliminating a Sentinel.`);
+        }
+      }
+      determineWinner(s);
+    }
+
+    function determineWinner(s) {
+      const alive = s.players.filter(p => p.alive);
+      const commanderAlive = alive.some(p => p.role === "commander");
+      const enemiesAlive = alive.some(p => p.role === "raider" || p.role === "rogue");
+      if (alive.length === 1 && alive[0].role === "rogue") {
+        finishGame(s, "rogue", `${alive[0].name}, the Rogue Unit, is the final survivor.`);
+        return true;
+      }
+      if (!commanderAlive) {
+        finishGame(s, "raiders", "The Commander has fallen. The Raiders win the mission.");
+        return true;
+      }
+      if (!enemiesAlive) {
+        finishGame(s, "command", "The Commander and Sentinels secured the ship.");
+        return true;
+      }
+      return false;
+    }
+
+    function finishGame(s, team, message) {
+      s.phase = "finished";
+      s.winner = { team, message };
+      s.players.forEach(p => p.roleRevealed = true);
+      addLog(s, message);
+    }
+
+    function autoDiscardToLimit(s, player) {
+      const limit = Math.max(0, player.hp);
+      let count = 0;
+      while (player.hand.length > limit) {
+        discardCard(s, takeRandom(player.hand));
+        count++;
+      }
+      if (count) addLog(s, `${player.name} discarded ${count} extra card${count === 1 ? "" : "s"}.`);
+    }
+
+    function endTurnState(s, actorId) {
+      if (s.phase !== "playing") throw new Error("The mission is not active.");
+      const actor = playerById(s, actorId);
+      if (!actor || s.turn.playerId !== actorId || !actor.alive) throw new Error("It is not that player's turn.");
+      autoDiscardToLimit(s, actor);
+      if (determineWinner(s)) return;
+      const next = nextLivingPlayer(s, actorId);
+      if (!next) return;
+      beginTurn(s, next.id);
+    }
+
+    function canTarget(s, source, target, type) {
+      if (!source || !target || !target.alive || source.id === target.id) return false;
+      const distance = distanceBetween(s, source.id, target.id);
+      if (type === "tractor") return distance <= 1;
+      if (type === "zap" || type === "emp") return distance <= weaponRange(source);
+      return false;
+    }
+
+    function validateCardPlay(s, actor, card, target) {
+      if (s.phase !== "playing") throw new Error("The mission is not active.");
+      if (!actor || !actor.alive || s.turn.playerId !== actor.id) throw new Error("It is not your turn.");
+      if (!card || !CARDS[card.type]) throw new Error("That card is no longer in your hand.");
+      if (card.type === "shield") throw new Error("Deflectors activate automatically when you are hit.");
+      if (card.type === "zap" && s.turn.attacksUsed >= 1) throw new Error("Only one Zap attack can be played each turn.");
+      if (card.type === "repair" && actor.hp >= actor.maxHp) throw new Error("Your health is already full.");
+      if (["zap", "tractor", "emp"].includes(card.type)) {
+        if (!target) throw new Error("Choose a target.");
+        if (!canTarget(s, actor, target, card.type)) throw new Error("That player is out of range.");
+      }
+    }
+
+    function playCardState(s, actorId, cardUid, targetId = null) {
+      const actor = playerById(s, actorId);
+      const card = actor?.hand.find(c => c.uid === cardUid);
+      const target = targetId ? playerById(s, targetId) : null;
+      validateCardPlay(s, actor, card, target);
+      const played = removeCardFromHand(actor, cardUid);
+      discardCard(s, played);
+
+      switch (played.type) {
+        case "zap":
+          s.turn.attacksUsed += 1;
+          resolveDamage(s, actor, target, 1, "Zap");
+          break;
+        case "repair":
+          actor.hp = Math.min(actor.maxHp, actor.hp + 1);
+          addLog(s, `${actor.name} used Nano Repair and restored 1 health.`);
+          break;
+        case "overcharge":
+          drawCards(s, actor, 2);
+          addLog(s, `${actor.name} overcharged and drew 2 cards.`);
+          break;
+        case "rifle":
+        case "rail": {
+          if (actor.equipment.weapon) discardCard(s, { uid: randomId("card"), type: actor.equipment.weapon });
+          actor.equipment.weapon = played.type;
+          addLog(s, `${actor.name} equipped ${CARDS[played.type].name}.`);
+          break;
+        }
+        case "suit":
+          if (actor.equipment.suit) discardCard(s, { uid: randomId("card"), type: "suit" });
+          actor.equipment.suit = true;
+          addLog(s, `${actor.name} equipped a Phase Suit.`);
+          break;
+        case "tractor": {
+          const stolen = takeRandom(target.hand);
+          if (stolen) {
+            actor.hand.push(stolen);
+            addLog(s, `${actor.name} used a Tractor Beam to steal a card from ${target.name}.`);
+          } else {
+            addLog(s, `${actor.name}'s Tractor Beam found no card to steal from ${target.name}.`);
+          }
+          break;
+        }
+        case "emp": {
+          if (target.equipment.weapon) {
+            const type = target.equipment.weapon;
+            target.equipment.weapon = null;
+            discardCard(s, { uid: randomId("card"), type });
+            addLog(s, `${actor.name}'s EMP disabled ${target.name}'s ${CARDS[type].name}.`);
+          } else if (target.equipment.suit) {
+            target.equipment.suit = false;
+            discardCard(s, { uid: randomId("card"), type: "suit" });
+            addLog(s, `${actor.name}'s EMP disabled ${target.name}'s Phase Suit.`);
+          } else {
+            const lost = takeRandom(target.hand);
+            if (lost) {
+              discardCard(s, lost);
+              addLog(s, `${actor.name}'s EMP erased one card from ${target.name}.`);
+            } else {
+              addLog(s, `${actor.name}'s EMP found nothing to disable on ${target.name}.`);
+            }
+          }
+          break;
+        }
+        case "sweep": {
+          addLog(s, `${actor.name} launched a System Sweep against the whole crew.`);
+          const targets = s.players.filter(p => p.alive && p.id !== actor.id);
+          for (const other of targets) {
+            if (s.phase !== "playing") break;
+            resolveDamage(s, actor, other, 1, "System Sweep");
+          }
+          break;
+        }
+      }
+      determineWinner(s);
+    }
+
+    function render() {
+      if (!state || !me) {
+        showScreen("home");
+        return;
+      }
+      const mySeat = myPlayer();
+      if (!mySeat) {
+        toast("Your seat is no longer in this room.");
+        leaveToHome(false);
+        return;
+      }
+      if (state.phase === "lobby") {
+        showScreen("lobby");
+        renderLobby();
+      } else {
+        showScreen("game");
+        renderGame();
+        scheduleBotIfNeeded();
+      }
+    }
+
+    function renderLobby() {
+      els.lobbyCode.textContent = roomCode;
+      els.playerCount.textContent = `${state.players.length}/${MAX_PLAYERS}`;
+      const needed = Math.max(0, MIN_PLAYERS - state.players.length);
+      els.lobbyMessage.textContent = needed ? `${needed} more player${needed === 1 ? "" : "s"} needed. The host can also add bots.` : "The crew is ready. The host can launch the mission.";
+      els.lobbyPlayers.innerHTML = state.players.map(p => `
+        <div class="lobby-player">
+          <div class="avatar">${p.avatar}</div>
+          <div class="player-main">
+            <div class="player-name">${escapeHtml(p.name)}${p.id === me.id ? " (You)" : ""}</div>
+            <div class="player-meta">Seat ${p.seat + 1}</div>
+          </div>
+          ${p.id === state.hostId ? '<span class="host-chip">HOST</span>' : ""}
+          ${p.bot ? '<span class="bot-chip">BOT</span>' : ""}
+        </div>
+      `).join("");
+      const host = isHost();
+      els.hostControls.classList.toggle("hidden", !host);
+      els.guestWaiting.classList.toggle("hidden", host);
+      els.addBotBtn.disabled = state.players.length >= MAX_PLAYERS;
+      els.removeBotBtn.disabled = !state.players.some(p => p.bot);
+      els.startGameBtn.disabled = state.players.length < MIN_PLAYERS || state.players.length > MAX_PLAYERS;
+      if (practiceMode) setStatus(els.lobbyStatus, "live", "Practice");
+    }
+
+    function visibleRole(player) {
+      if (player.role === "commander" || player.roleRevealed || state.phase === "finished" || player.id === me.id) return ROLE_INFO[player.role];
+      return { name: "Hidden Role", icon: "❔", color: "rgba(111,136,255,.20)", goal: "Role remains secret." };
+    }
+
+    function renderGame() {
+      const mine = myPlayer();
+      const role = ROLE_INFO[mine.role];
+      els.gameRoomPill.textContent = roomCode;
+      if (practiceMode) setStatus(els.gameStatus, "live", "Practice");
+      els.myRoleBanner.style.setProperty("--role-glow", role.color);
+      els.myRoleBanner.innerHTML = `
+        <div class="role-row">
+          <div class="role-icon">${role.icon}</div>
+          <div>
+            <div class="eyebrow">Your secret role</div>
+            <div class="role-name">${role.name}</div>
+            <div class="role-goal">${role.goal}</div>
+          </div>
+        </div>`;
+
+      const turnPlayer = currentPlayer();
+      const yourTurn = isMyTurn();
+      if (state.phase === "finished") {
+        els.turnBanner.innerHTML = `<strong>Mission complete</strong><span>All roles have been revealed</span>`;
+      } else if (yourTurn) {
+        els.turnBanner.innerHTML = `<strong style="color:var(--cyan)">Your turn</strong><span>Play cards, then end your turn</span>`;
+      } else {
+        els.turnBanner.innerHTML = `<strong>${escapeHtml(turnPlayer?.name || "Waiting")}'s turn</strong><span>Turn ${state.turn?.number || 0}</span>`;
+      }
+
+      const selectedCard = mine.hand.find(c => c.uid === selectedCardUid);
+      const targetable = selectedCard ? validTargetsForCard(selectedCard.type).map(p => p.id) : [];
+      els.playersTable.innerHTML = state.players
+        .slice().sort((a,b) => a.seat - b.seat)
+        .map(p => renderSeat(p, turnPlayer, targetable)).join("");
+      els.playersTable.querySelectorAll(".seat.targetable").forEach(node => {
+        node.addEventListener("click", () => chooseTarget(node.dataset.playerId));
+      });
+
+      renderLogs();
+      renderHand();
+      renderGameOver();
+    }
+
+    function renderSeat(p, turnPlayer, targetable) {
+      const role = visibleRole(p);
+      const hp = Array.from({ length: p.maxHp || 4 }, (_, i) => `<span class="hp ${i < p.hp ? "" : "empty"}">♥</span>`).join("");
+      const tags = [];
+      if (p.equipment.weapon) tags.push(`${CARDS[p.equipment.weapon].icon} Range ${weaponRange(p)}`);
+      else if (p.alive) tags.push("📍 Range 1");
+      if (p.equipment.suit) tags.push("🥽 +1 distance");
+      if (p.role === "commander") tags.push("PUBLIC");
+      return `
+        <article class="seat ${turnPlayer?.id === p.id && state.phase === "playing" ? "current" : ""} ${p.id === me.id ? "you" : ""} ${!p.alive ? "dead" : ""} ${targetable.includes(p.id) ? "targetable" : ""}" data-player-id="${p.id}">
+          <div class="seat-head">
+            <div class="seat-avatar">${p.avatar}</div>
+            <div class="seat-title">
+              <div class="seat-name">${escapeHtml(p.name)}${p.id === me.id ? " (You)" : ""}</div>
+              <div class="seat-role">${role.icon} ${role.name}</div>
+            </div>
+          </div>
+          <div class="health">${hp}</div>
+          <div class="seat-tags">${tags.map(t => `<span class="mini-tag">${t}</span>`).join("")}</div>
+          <div class="hand-count">🂠 ${p.hand.length}</div>
+        </article>`;
+    }
+
+    function renderLogs() {
+      const logs = state.logs || [];
+      const latest = logs[0]?.text || "Mission initialized.";
+      els.currentLog.innerHTML = `<b>Latest:</b> ${escapeHtml(latest)}`;
+      els.logHistory.innerHTML = logs.slice(1).map(log => `<div class="log-entry">${escapeHtml(log.text)}</div>`).join("") || '<div class="log-entry">No earlier actions.</div>';
+    }
+
+    function renderHand() {
+      const mine = myPlayer();
+      const yourTurn = isMyTurn();
+      const active = state.phase === "playing" && mine.alive;
+      els.handCount.textContent = `(${mine.hand.length})`;
+      if (!mine.alive) els.handInstruction.textContent = "You are observing the mission";
+      else if (yourTurn) els.handInstruction.textContent = "Tap a card to select it";
+      else els.handInstruction.textContent = "Wait for your turn";
+
+      if (!mine.hand.length) {
+        els.cards.innerHTML = `<div class="empty-hand">Your hand is empty.</div>`;
+      } else {
+        els.cards.innerHTML = mine.hand.map(card => {
+          const info = CARDS[card.type];
+          const playable = yourTurn && active && card.type !== "shield";
+          return `<button class="card ${selectedCardUid === card.uid ? "selected" : ""} ${playable ? "" : "disabled"}" data-card-uid="${card.uid}" style="--card-glow:${info.glow}">
+            <div class="card-icon">${info.icon}</div>
+            <div class="card-name">${info.name}</div>
+            <div class="card-type">${info.type}</div>
+            <div class="card-desc">${info.desc}</div>
+          </button>`;
+        }).join("");
+        els.cards.querySelectorAll(".card").forEach(node => node.addEventListener("click", () => selectCard(node.dataset.cardUid)));
+      }
+
+      const card = mine.hand.find(c => c.uid === selectedCardUid);
+      renderTargetStrip(card);
+      const needsTarget = card && ["zap", "tractor", "emp"].includes(card.type);
+      const canPlay = yourTurn && card && card.type !== "shield" && (!needsTarget || selectedTargetId);
+      els.playCardBtn.disabled = !canPlay;
+      els.playCardBtn.textContent = !card ? "Select a card" : needsTarget && !selectedTargetId ? "Choose a target" : `Play ${CARDS[card.type].name}`;
+      els.endTurnBtn.disabled = !yourTurn || state.phase !== "playing";
+    }
+
+    function renderTargetStrip(card) {
+      const requiresTarget = card && ["zap", "tractor", "emp"].includes(card.type);
+      els.targetStrip.classList.toggle("hidden", !requiresTarget);
+      if (!requiresTarget) {
+        els.targetStrip.innerHTML = "";
+        return;
+      }
+      const targets = validTargetsForCard(card.type);
+      els.targetStrip.innerHTML = targets.length ? targets.map(p => `<button class="target-btn" data-target-id="${p.id}">${p.avatar} ${escapeHtml(p.name)} · ${distanceBetween(state, me.id, p.id)} away</button>`).join("") : `<span style="color:var(--muted);font-size:11px;padding:8px">No valid targets are in range.</span>`;
+      els.targetStrip.querySelectorAll(".target-btn").forEach(node => node.addEventListener("click", () => chooseTarget(node.dataset.targetId)));
+    }
+
+    function renderGameOver() {
+      const finished = state.phase === "finished";
+      els.gameOverBox.classList.toggle("hidden", !finished);
+      if (!finished) return;
+      const winnerName = state.winner?.team === "command" ? "Command Team Wins" : state.winner?.team === "raiders" ? "Raiders Win" : "Rogue Unit Wins";
+      els.gameOverBox.innerHTML = `
+        <div class="eyebrow">Mission result</div>
+        <h2>${winnerName}</h2>
+        <p>${escapeHtml(state.winner?.message || "The mission is complete.")}</p>
+        ${isHost() && !practiceMode ? '<button id="returnLobbyBtn" class="btn btn-cyan">New Mission, Same Crew</button>' : '<button id="homeAfterGameBtn" class="btn btn-soft">Return Home</button>'}`;
+      const returnLobby = $("returnLobbyBtn");
+      const homeAfter = $("homeAfterGameBtn");
+      if (returnLobby) returnLobby.addEventListener("click", resetToLobby);
+      if (homeAfter) homeAfter.addEventListener("click", () => leaveToHome(false));
+    }
+
+    function selectCard(uid) {
+      if (!isMyTurn()) return toast("Wait for your turn.");
+      const card = myPlayer().hand.find(c => c.uid === uid);
+      if (!card) return;
+      if (card.type === "shield") return toast("Deflectors activate automatically when you are hit.");
+      selectedCardUid = selectedCardUid === uid ? null : uid;
+      selectedTargetId = null;
+      renderGame();
+    }
+
+    function validTargetsForCard(type) {
+      const source = myPlayer();
+      if (!source) return [];
+      return state.players.filter(target => canTarget(state, source, target, type));
+    }
+
+    function chooseTarget(playerId) {
+      if (!selectedCardUid) return;
+      const card = myPlayer().hand.find(c => c.uid === selectedCardUid);
+      if (!card) return;
+      const target = playerById(state, playerId);
+      if (!target || !canTarget(state, myPlayer(), target, card.type)) return toast("That player is out of range.");
+      selectedTargetId = playerId;
+      renderGame();
+    }
+
+    async function playSelectedCard() {
+      if (!selectedCardUid || !isMyTurn()) return;
+      const cardUid = selectedCardUid;
+      const targetId = selectedTargetId;
+      await mutate((s) => playCardState(s, me.id, cardUid, targetId));
+    }
+
+    async function endMyTurn() {
+      if (!isMyTurn()) return;
+      await mutate((s) => endTurnState(s, me.id));
+    }
+
+    async function addBot() {
+      await mutate((s) => {
+        if (s.hostId !== me.id || s.phase !== "lobby") throw new Error("Only the host can add bots in the lobby.");
+        if (s.players.length >= MAX_PLAYERS) throw new Error("The room is full.");
+        const used = new Set(s.players.map(p => p.name));
+        const name = BOT_NAMES.find(n => !used.has(n)) || `Bot ${s.players.length}`;
+        const bot = createPlayer(name, true, s.players.length);
+        s.players.push(bot);
+        addLog(s, `${bot.name} joined as a bot.`);
+      });
+    }
+
+    async function removeBot() {
+      await mutate((s) => {
+        if (s.hostId !== me.id || s.phase !== "lobby") throw new Error("Only the host can remove bots in the lobby.");
+        const index = [...s.players].reverse().findIndex(p => p.bot);
+        if (index < 0) throw new Error("There are no bots to remove.");
+        const actual = s.players.length - 1 - index;
+        const [removed] = s.players.splice(actual, 1);
+        s.players.forEach((p, i) => { p.seat = i; p.avatar = AVATARS[i % AVATARS.length]; });
+        addLog(s, `${removed.name} was removed.`);
+      });
+    }
+
+    async function startGame() {
+      await mutate((s) => {
+        if (s.hostId !== me.id) throw new Error("Only the host can launch the mission.");
+        startGameState(s);
+      });
+    }
+
+    async function resetToLobby() {
+      await mutate((s) => {
+        if (s.hostId !== me.id) throw new Error("Only the host can restart the room.");
+        s.phase = "lobby";
+        s.deck = [];
+        s.discard = [];
+        s.turn = null;
+        s.winner = null;
+        s.players.forEach(p => {
+          p.role = null;
+          p.roleRevealed = false;
+          p.alive = true;
+          p.hp = 0;
+          p.maxHp = 0;
+          p.hand = [];
+          p.equipment = { weapon: null, suit: false };
+        });
+        addLog(s, "The crew returned to the lobby for a new mission.");
+      });
+    }
+
+    function scheduleBotIfNeeded() {
+      clearTimeout(botTimer);
+      if (!state || state.phase !== "playing") return;
+      const bot = currentPlayer();
+      if (!bot?.bot || !bot.alive) return;
+      const expectedTurn = state.turn.number;
+      botTimer = setTimeout(() => runBotTurn(bot.id, expectedTurn), 850 + Math.random() * 500);
+    }
+
+    async function runBotTurn(botId, expectedTurn) {
+      await mutate((s) => {
+        if (s.phase !== "playing" || s.turn.playerId !== botId || s.turn.number !== expectedTurn) return;
+        const bot = playerById(s, botId);
+        if (!bot?.alive) return;
+        let safety = 0;
+        while (s.phase === "playing" && s.turn.playerId === botId && safety++ < 10) {
+          const move = chooseBotMove(s, bot);
+          if (!move) break;
+          playCardState(s, bot.id, move.cardUid, move.targetId || null);
+        }
+        if (s.phase === "playing" && s.turn.playerId === botId) endTurnState(s, botId);
+      }, { bot: true });
+    }
+
+    function chooseBotMove(s, bot) {
+      const roleEnemies = (target) => {
+        if (!target.alive || target.id === bot.id) return false;
+        if (bot.role === "commander" || bot.role === "sentinel") return target.role === "raider" || target.role === "rogue";
+        if (bot.role === "raider") return target.role === "commander" || (target.role === "sentinel" && Math.random() < .35);
+        return true;
+      };
+      const enemies = shuffle(s.players.filter(roleEnemies));
+      const cardOf = (type) => bot.hand.find(c => c.type === type);
+
+      if (bot.hp < bot.maxHp) {
+        const repair = cardOf("repair");
+        if (repair) return { cardUid: repair.uid };
+      }
+      if (!bot.equipment.weapon) {
+        const rail = cardOf("rail");
+        if (rail) return { cardUid: rail.uid };
+        const rifle = cardOf("rifle");
+        if (rifle) return { cardUid: rifle.uid };
+      }
+      if (!bot.equipment.suit) {
+        const suit = cardOf("suit");
+        if (suit) return { cardUid: suit.uid };
+      }
+      const overcharge = cardOf("overcharge");
+      if (overcharge && bot.hand.length < 7) return { cardUid: overcharge.uid };
+
+      const commander = s.players.find(p => p.alive && p.role === "commander");
+      const preferred = bot.role === "raider" && commander ? [commander, ...enemies.filter(p => p.id !== commander.id)] : enemies;
+      const zap = cardOf("zap");
+      if (zap && s.turn.attacksUsed < 1) {
+        const target = preferred.find(t => canTarget(s, bot, t, "zap"));
+        if (target) return { cardUid: zap.uid, targetId: target.id };
+      }
+      const emp = cardOf("emp");
+      if (emp) {
+        const target = preferred.find(t => canTarget(s, bot, t, "emp") && (t.equipment.weapon || t.equipment.suit || t.hand.length));
+        if (target) return { cardUid: emp.uid, targetId: target.id };
+      }
+      const tractor = cardOf("tractor");
+      if (tractor) {
+        const target = preferred.find(t => canTarget(s, bot, t, "tractor") && t.hand.length);
+        if (target) return { cardUid: tractor.uid, targetId: target.id };
+      }
+      const sweep = cardOf("sweep");
+      if (sweep && Math.random() < .35) return { cardUid: sweep.uid };
+      return null;
+    }
+
+    function openRules() { els.rulesModal.classList.remove("hidden"); }
+    function closeRules() { els.rulesModal.classList.add("hidden"); }
+
+    async function leaveLobby() {
+      if (!state || !me) return leaveToHome(false);
+      if (practiceMode) return leaveToHome(false);
+      if (state.phase !== "lobby") return leaveToHome(false);
+      await mutate((s) => {
+        const index = s.players.findIndex(p => p.id === me.id);
+        if (index < 0) return;
+        const [removed] = s.players.splice(index, 1);
+        if (!s.players.length) return;
+        if (s.hostId === removed.id) {
+          const nextHost = s.players.find(p => !p.bot) || s.players[0];
+          s.hostId = nextHost.id;
+          addLog(s, `${nextHost.name} is now the host.`);
+        }
+        s.players.forEach((p, i) => { p.seat = i; p.avatar = AVATARS[i % AVATARS.length]; });
+        addLog(s, `${removed.name} left the room.`);
+      });
+      leaveToHome(false);
+    }
+
+    async function leaveToHome(clearIdentity = false) {
+      clearTimeout(botTimer);
+      if (channel && client) {
+        try { await client.removeChannel(channel); } catch {}
+      }
+      if (clearIdentity && roomCode) localStorage.removeItem(identityKey(roomCode));
+      channel = null;
+      state = null;
+      me = null;
+      roomCode = null;
+      roomVersion = 0;
+      practiceMode = false;
+      selectedCardUid = null;
+      selectedTargetId = null;
+      showScreen("home");
+      updateResumeButton();
+    }
+
+    function updateResumeButton() {
+      const last = localStorage.getItem("zap_last_room");
+      els.resumeBtn.classList.toggle("hidden", !last || !client);
+      if (last) els.resumeBtn.textContent = `↻ Resume Room ${last}`;
+      const lastName = localStorage.getItem("zap_last_name");
+      if (lastName && !els.createName.value) els.createName.value = lastName;
+      if (lastName && !els.joinName.value) els.joinName.value = lastName;
+    }
+
+    function escapeHtml(text) {
+      return String(text ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
+    }
+
+    function installRulesGuide() {
+      els.rulesCards.innerHTML = Object.values(CARDS).map(card => `<div class="guide-item"><b>${card.icon} ${card.name}</b><span>${card.desc}</span></div>`).join("");
+    }
+
+    function installEvents() {
+      els.createBtn.addEventListener("click", () => createOnlineRoom(els.createName.value));
+      els.joinBtn.addEventListener("click", () => joinOnlineRoom(els.joinCode.value, els.joinName.value));
+      els.practiceBtn.addEventListener("click", createPractice);
+      els.resumeBtn.addEventListener("click", resumeLastRoom);
+      els.joinCode.addEventListener("input", () => { els.joinCode.value = els.joinCode.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4); });
+      els.createName.addEventListener("keydown", e => { if (e.key === "Enter") createOnlineRoom(els.createName.value); });
+      els.joinCode.addEventListener("keydown", e => { if (e.key === "Enter") joinOnlineRoom(els.joinCode.value, els.joinName.value); });
+      $("rulesHomeBtn").addEventListener("click", openRules);
+      document.querySelectorAll(".rules-btn").forEach(btn => btn.addEventListener("click", openRules));
+      $("closeRulesBtn").addEventListener("click", closeRules);
+      els.rulesModal.addEventListener("click", e => { if (e.target === els.rulesModal) closeRules(); });
+      $("copyCodeBtn").addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(roomCode); toast("Room code copied."); }
+        catch { toast(`Room code: ${roomCode}`); }
+      });
+      $("leaveLobbyBtn").addEventListener("click", leaveLobby);
+      els.addBotBtn.addEventListener("click", addBot);
+      els.removeBotBtn.addEventListener("click", removeBot);
+      els.startGameBtn.addEventListener("click", startGame);
+      els.playCardBtn.addEventListener("click", playSelectedCard);
+      els.endTurnBtn.addEventListener("click", endMyTurn);
+      els.logToggle.addEventListener("click", () => {
+        const hidden = els.logHistory.classList.toggle("hidden");
+        els.logToggle.textContent = hidden ? "Show mission history" : "Hide mission history";
+      });
+      window.addEventListener("beforeunload", () => { if (channel && client) client.removeChannel(channel); });
+    }
+
+    function registerServiceWorker() {
+      if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+        navigator.serviceWorker.register("./sw.js").catch(error => console.warn("Service worker not registered", error));
+      }
+    }
+
+    function boot() {
+      installRulesGuide();
+      installEvents();
+      const ready = initClient();
+      if (!ready) {
+        els.onlineNotice.classList.remove("hidden");
+        els.onlineNotice.innerHTML = "<b>Practice mode is ready.</b> To turn on online rooms, add your Supabase project URL and publishable key near the top of the JavaScript in <code>index.html</code>, then run <code>supabase-setup.sql</code>.";
+        els.createBtn.disabled = true;
+        els.joinBtn.disabled = true;
+      }
+      updateResumeButton();
+      registerServiceWorker();
+    }
+
+    boot();
+  })();
+  </script>
+</body>
+</html>
