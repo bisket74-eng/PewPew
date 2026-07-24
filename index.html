@@ -2487,8 +2487,7 @@
       if (els.crewStatusLabel) els.crewStatusLabel.textContent = `Crew status · Round ${currentRoundNumber(state)}`;
       const selectedCard = mine.hand.find(c => c.uid === selectedCardUid);
       const targetable = selectedCard ? validTargetsForCard(selectedCard.type).map(p => p.id) : [];
-      els.playersTable.innerHTML = state.players
-        .slice().sort((a,b) => a.seat - b.seat)
+      els.playersTable.innerHTML = visualCrewOrder(state, me.id)
         .map(p => renderSeat(p, turnPlayer, targetable)).join("");
       els.playersTable.querySelectorAll(".seat.targetable").forEach(node => {
         node.addEventListener("click", () => chooseTarget(node.dataset.playerId));
@@ -2512,6 +2511,44 @@
       renderHand();
       renderGameOver();
       queueCardEffect(state.lastEffect);
+    }
+
+    function visualCrewOrder(s, viewerId) {
+      const seated = (s.players || []).slice().sort((a, b) => a.seat - b.seat);
+      const viewer = seated.find(player => player.id === viewerId);
+      if (!viewer) return seated;
+
+      // Lay the round table out as a two-column visual fan around the viewer:
+      // viewer, clockwise neighbor, counterclockwise neighbor, then distance 2, etc.
+      // This keeps the two distance-1 players immediately right of and below you.
+      const activeRing = seated.filter(player => player.alive);
+      const ring = viewer.alive ? activeRing : seated;
+      const start = ring.findIndex(player => player.id === viewerId);
+      if (start < 0 || ring.length < 2) return [viewer, ...seated.filter(player => player.id !== viewerId)];
+
+      const ordered = [viewer];
+      const used = new Set([viewer.id]);
+      for (let step = 1; ordered.length < ring.length; step++) {
+        const clockwise = ring[(start + step) % ring.length];
+        const counterclockwise = ring[(start - step + ring.length) % ring.length];
+        if (clockwise && !used.has(clockwise.id)) {
+          ordered.push(clockwise);
+          used.add(clockwise.id);
+        }
+        if (counterclockwise && !used.has(counterclockwise.id)) {
+          ordered.push(counterclockwise);
+          used.add(counterclockwise.id);
+        }
+      }
+
+      // Eliminated crew remain visible after the living distance ring.
+      seated.forEach(player => {
+        if (!used.has(player.id)) {
+          ordered.push(player);
+          used.add(player.id);
+        }
+      });
+      return ordered;
     }
 
     function targetPrompt(type) {
