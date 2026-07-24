@@ -689,6 +689,7 @@
     let voiceLocalTrack = null;
     let voiceStopTimer = null;
     const voicePeers = new Map();
+    const remoteVoiceTalkers = new Set();
 
 
     // Lightweight synthesized game sounds. No external audio files are required.
@@ -731,12 +732,17 @@
     document.addEventListener("pointerdown", unlockZapSfx, { capture: true, passive: true });
     document.addEventListener("keydown", unlockZapSfx, { capture: true });
 
+    function voiceAudioIsActive() {
+      return voicePressing || remoteVoiceTalkers.size > 0;
+    }
+
     function zapSfxOutputGain() {
       if (!zapSfx.master) return;
       const ctx = zapSfx.context;
-      const target = voicePressing ? 0.045 : 0.19;
+      const target = voiceAudioIsActive() ? 0 : 0.19;
       zapSfx.master.gain.cancelScheduledValues(ctx.currentTime);
-      zapSfx.master.gain.linearRampToValueAtTime(target, ctx.currentTime + 0.05);
+      zapSfx.master.gain.setValueAtTime(zapSfx.master.gain.value, ctx.currentTime);
+      zapSfx.master.gain.linearRampToValueAtTime(target, ctx.currentTime + 0.045);
     }
 
     function sfxTone(frequency, duration, options = {}) {
@@ -967,7 +973,7 @@
     }
 
     function playCardEffectSound(effect) {
-      if (!effect || document.hidden) return;
+      if (!effect || document.hidden || voiceAudioIsActive()) return;
       const type = effect.cardType || effect.type;
       switch (type) {
         case "zap": sfxZap(false); break;
@@ -1363,6 +1369,7 @@
       try { peer.pc.ontrack = null; peer.pc.onicecandidate = null; peer.pc.close(); } catch {}
       try { peer.audio?.remove(); } catch {}
       voicePeers.delete(remoteId);
+      if (remoteVoiceTalkers.delete(remoteId)) zapSfxOutputGain();
     }
 
     async function addQueuedVoiceCandidates(peer) {
@@ -1457,8 +1464,15 @@
 
     async function handleVoiceSignal(message) {
       const payload = message?.payload || message || {};
-      if (!me || payload.to !== me.id || !payload.from || payload.from === me.id) return;
+      if (!me || (payload.to !== me.id && payload.to !== "*") || !payload.from || payload.from === me.id) return;
       if (!humanVoicePlayerIds().has(payload.from)) return;
+
+      if (payload.kind === "talk-state") {
+        if (payload.active) remoteVoiceTalkers.add(payload.from);
+        else remoteVoiceTalkers.delete(payload.from);
+        zapSfxOutputGain();
+        return;
+      }
 
       try {
         const peer = await ensureVoicePeer(payload.from, false);
@@ -1558,6 +1572,8 @@
 
     async function stopVoiceRoom(sendLeave = true) {
       voicePressing = false;
+      remoteVoiceTalkers.clear();
+      zapSfxOutputGain();
       setRemoteVoiceMuted(false);
       if (sendLeave && voiceChannel && voiceReady && me) {
         try { await voiceSignal({ kind: "leave", to: "*" }); } catch {}
@@ -1630,6 +1646,7 @@
       if (!track) {
         voicePressing = false;
         zapSfxOutputGain();
+        voiceSignal({ kind: "talk-state", to: "*", active: false });
         setRemoteVoiceMuted(false);
         updateVoiceButton();
         return;
@@ -1640,6 +1657,8 @@
         return;
       }
       track.enabled = true;
+      zapSfxOutputGain();
+      voiceSignal({ kind: "talk-state", to: "*", active: true });
       updateVoiceButton();
     }
 
@@ -1647,6 +1666,7 @@
       if (!voicePressing && !voiceLocalTrack?.enabled) return;
       voicePressing = false;
       zapSfxOutputGain();
+      voiceSignal({ kind: "talk-state", to: "*", active: false });
       if (voiceLocalTrack) voiceLocalTrack.enabled = false;
       setRemoteVoiceMuted(false);
       resumeRemoteVoiceAudio();
