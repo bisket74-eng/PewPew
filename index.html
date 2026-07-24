@@ -77,10 +77,11 @@
 
     .field { display: grid; gap: 7px; margin-bottom: 12px; }
     .field label { color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
-    .field input { width: 100%; border-radius: 15px; border: 1px solid rgba(149,165,236,.26); color: var(--text); background: rgba(6,10,25,.64); padding: 14px 15px; outline: none; }
-    .field input:focus { border-color: rgba(85,231,255,.72); box-shadow: 0 0 0 3px rgba(85,231,255,.10); }
-    .field input::placeholder { color: #747ea8; }
-    .room-input { text-transform: uppercase; letter-spacing: .2em; font-weight: 900; }
+    .field input { width: 100%; border-radius: 15px; border: 1px solid rgba(190,203,255,.42); color: var(--text); background: rgba(58,71,119,.46); padding: 14px 15px; outline: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.045); }
+    .field input:focus { border-color: rgba(85,231,255,.82); background: rgba(67,82,137,.56); box-shadow: 0 0 0 3px rgba(85,231,255,.12); }
+    .field input::placeholder { color: #b2bcdf; opacity: .88; }
+    .room-input { text-transform: uppercase; letter-spacing: .28em; font-weight: 900; text-align: center; }
+    .room-input::placeholder { color: #c2cae7; letter-spacing: .38em; opacity: .92; }
 
     .button-row { display: flex; gap: 10px; flex-wrap: wrap; }
     .btn { min-height: 48px; flex: 1; border-radius: 15px; padding: 12px 16px; color: white; font-weight: 850; cursor: pointer; transition: transform .16s ease, filter .16s ease, opacity .16s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
@@ -228,6 +229,9 @@
     .modal { width: min(100%, 650px); max-height: 88dvh; overflow: auto; margin: 0 auto; border-radius: 25px 25px 18px 18px; background: linear-gradient(180deg, #202a52, #11172f); border: 1px solid rgba(150,168,245,.28); box-shadow: 0 -20px 60px rgba(0,0,0,.4); padding: 17px; }
     .modal-head { position: sticky; top: -17px; background: rgba(29,38,75,.96); backdrop-filter: blur(14px); margin: -17px -17px 12px; padding: 15px 17px 12px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(141,163,255,.16); }
     .modal-head h2 { margin: 0; font-size: 20px; flex: 1; }
+    .exit-modal { max-width: 430px; }
+    .exit-copy { color: #cbd2f2; font-size: 13px; line-height: 1.55; margin: 4px 0 16px; }
+    .exit-actions { display: grid; gap: 9px; }
     .rules-section { margin: 16px 0; }
     .rules-section h3 { color: var(--cyan); font-size: 14px; margin: 0 0 7px; }
     .rules-section p, .rules-section li { color: #c2c8e8; font-size: 12px; line-height: 1.55; }
@@ -265,7 +269,7 @@
           <p class="panel-sub">Start a room, then give the four-letter code to everyone playing on their own phone.</p>
           <div class="field">
             <label for="createName">Your name</label>
-            <input id="createName" maxlength="18" autocomplete="nickname" placeholder="Captain Nova" />
+            <input id="createName" maxlength="18" autocomplete="nickname" placeholder="Enter your name" />
           </div>
           <button id="createBtn" class="btn btn-cyan">✦ Create Room</button>
         </section>
@@ -275,11 +279,11 @@
           <p class="panel-sub">Enter the room code shown on the host’s screen.</p>
           <div class="field">
             <label for="joinName">Your name</label>
-            <input id="joinName" maxlength="18" autocomplete="nickname" placeholder="Orbit" />
+            <input id="joinName" maxlength="18" autocomplete="nickname" placeholder="Enter your name" />
           </div>
           <div class="field">
             <label for="joinCode">Room code</label>
-            <input id="joinCode" class="room-input" maxlength="4" autocomplete="off" placeholder="STAR" />
+            <input id="joinCode" class="room-input" maxlength="4" autocomplete="off" placeholder="— — — —" />
           </div>
           <button id="joinBtn" class="btn btn-primary">↗ Join Room</button>
         </section>
@@ -395,8 +399,9 @@
         <ul>
           <li>You automatically draw two cards.</li>
           <li>Play as many cards as you want, but only one Zap attack per turn.</li>
-          <li>Your normal firing range is 1 seat. Weapons increase it.</li>
+          <li>Your normal firing range is 1 seat. The players immediately beside you are distance 1; players farther around the circle are distance 2, 3, and so on. Weapons increase how far you can fire.</li>
           <li>End your turn when finished. Extra cards above your current health are automatically discarded.</li>
+          <li>Bots pause for about five seconds after each action so everyone has time to read the mission log.</li>
         </ul>
       </div>
       <div class="rules-section">
@@ -406,6 +411,19 @@
       <div class="rules-section">
         <h3>Eliminations</h3>
         <p>A Deflector in your hand automatically blocks one point of damage. Eliminating a Raider earns three cards. If the Commander accidentally eliminates a Sentinel, the Commander loses every card and equipped item.</p>
+      </div>
+    </section>
+  </div>
+
+  <div id="exitModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="exitTitle">
+    <section class="modal exit-modal">
+      <header class="modal-head">
+        <h2 id="exitTitle">Exit Zap?</h2>
+      </header>
+      <p id="exitMessage" class="exit-copy">Your mission is still active. Are you sure you want to leave this screen?</p>
+      <div class="exit-actions">
+        <button id="stayInGameBtn" class="btn btn-primary">Stay in Game</button>
+        <button id="confirmExitBtn" class="btn btn-soft">Exit Game</button>
       </div>
     </section>
   </div>
@@ -538,7 +556,9 @@
       myRoleBanner: $("myRoleBanner"), turnBanner: $("turnBanner"), expansionPanel: $("expansionPanel"), playersTable: $("playersTable"),
       currentLog: $("currentLog"), logToggle: $("logToggle"), logHistory: $("logHistory"),
       cards: $("cards"), handCount: $("handCount"), handInstruction: $("handInstruction"), targetStrip: $("targetStrip"), playCardBtn: $("playCardBtn"), endTurnBtn: $("endTurnBtn"),
-      gameOverBox: $("gameOverBox"), rulesModal: $("rulesModal"), rulesCards: $("rulesCards"), toastStack: $("toastStack")
+      gameOverBox: $("gameOverBox"), rulesModal: $("rulesModal"), rulesCards: $("rulesCards"),
+      exitModal: $("exitModal"), exitMessage: $("exitMessage"), stayInGameBtn: $("stayInGameBtn"), confirmExitBtn: $("confirmExitBtn"),
+      toastStack: $("toastStack")
     };
 
     let client = null;
@@ -551,8 +571,12 @@
     let selectedTargetId = null;
     let practiceMode = false;
     let botTimer = null;
+    let botRunActive = false;
+    let exitPromptOpen = false;
     let realtimeReady = false;
     let mutationBusy = false;
+
+    const BOT_ACTION_DISPLAY_MS = 5000;
 
     function onlineConfigured() {
       return SUPABASE_URL.startsWith("https://") && !SUPABASE_URL.includes("YOUR_") && SUPABASE_KEY.length > 20 && !SUPABASE_KEY.includes("YOUR_");
@@ -575,6 +599,7 @@
     }
 
     function deepClone(value) { return JSON.parse(JSON.stringify(value)); }
+    function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
     function defaultExpansionState() {
       return Object.fromEntries(Object.keys(EXPANSIONS).map(id => [id, false]));
@@ -1598,6 +1623,8 @@
         els.turnBanner.innerHTML = `<strong>Mission complete</strong><span>All roles have been revealed</span>`;
       } else if (yourTurn) {
         els.turnBanner.innerHTML = `<strong style="color:var(--cyan)">Your turn</strong><span>Play cards, then end your turn</span>`;
+      } else if (turnPlayer?.bot) {
+        els.turnBanner.innerHTML = `<strong>${escapeHtml(turnPlayer.name)}'s turn</strong><span>Each bot action stays up for 5 seconds</span>`;
       } else {
         els.turnBanner.innerHTML = `<strong>${escapeHtml(turnPlayer?.name || "Waiting")}'s turn</strong><span>Turn ${state.turn?.number || 0}</span>`;
       }
@@ -1621,7 +1648,10 @@
       const role = visibleRole(p);
       const hp = Array.from({ length: p.maxHp || 4 }, (_, i) => `<span class="hp ${i < p.hp ? "" : "empty"}">♥</span>`).join("");
       const tags = [];
-      if (p.alive) tags.push(`📍 Range ${weaponRange(p, state)}`);
+      if (p.alive) {
+        tags.push(`🎯 ${p.id === me.id ? "Your" : "Their"} Zap range ${weaponRange(p, state)}`);
+        if (p.id !== me.id) tags.push(`↔ ${distanceBetween(state, me.id, p.id)} away from you`);
+      }
       if (p.equipment.suit) tags.push("🥽 +1 distance");
       if (p.equipment.drone) tags.push("🛸 Drone");
       if (p.equipment.decoy) tags.push("👥 Decoy");
@@ -1865,39 +1895,78 @@
 
     function scheduleBotIfNeeded() {
       clearTimeout(botTimer);
-      if (!state || state.phase !== "playing") return;
+      if (!state || state.phase !== "playing" || exitPromptOpen) return;
+      if (!practiceMode && !isHost()) return;
+      if (botRunActive) return;
       const bot = currentPlayer();
       if (!bot?.bot || !bot.alive) return;
       const expectedTurn = state.turn.number;
-      botTimer = setTimeout(() => runBotTurn(bot.id, expectedTurn), 850 + Math.random() * 500);
+      botTimer = setTimeout(() => runBotTurn(bot.id, expectedTurn), BOT_ACTION_DISPLAY_MS);
     }
 
     async function runBotTurn(botId, expectedTurn) {
-      await mutate((s) => {
-        if (s.phase !== "playing" || s.turn.playerId !== botId || s.turn.number !== expectedTurn) return;
-        const bot = playerById(s, botId);
-        if (!bot?.alive) return;
-        runBotExpansionActions(s, bot);
+      if (botRunActive) return;
+      botRunActive = true;
+      clearTimeout(botTimer);
+      try {
         let safety = 0;
-        while (s.phase === "playing" && s.turn.playerId === botId && safety++ < 10) {
-          const move = chooseBotMove(s, bot);
-          if (!move) break;
-          playCardState(s, bot.id, move.cardUid, move.targetId || null);
+        while (safety++ < 12) {
+          while (exitPromptOpen) await sleep(250);
+          if (!state || state.phase !== "playing" || state.turn.playerId !== botId || state.turn.number !== expectedTurn) break;
+
+          let endedTurn = false;
+          await mutate((s) => {
+            if (s.phase !== "playing" || s.turn.playerId !== botId || s.turn.number !== expectedTurn) {
+              endedTurn = true;
+              return;
+            }
+            const bot = playerById(s, botId);
+            if (!bot?.alive) {
+              endedTurn = true;
+              return;
+            }
+
+            const expansionAction = chooseBotExpansionAction(s, bot);
+            if (expansionAction) {
+              applyBotExpansionAction(s, bot, expansionAction);
+              return;
+            }
+
+            const move = chooseBotMove(s, bot);
+            if (move) {
+              playCardState(s, bot.id, move.cardUid, move.targetId || null);
+              return;
+            }
+
+            endTurnState(s, bot.id);
+            endedTurn = true;
+          }, { bot: true });
+
+          if (endedTurn || !state || state.phase !== "playing" || state.turn.playerId !== botId || state.turn.number !== expectedTurn) break;
+          await sleep(BOT_ACTION_DISPLAY_MS);
         }
-        if (s.phase === "playing" && s.turn.playerId === botId) endTurnState(s, botId);
-      }, { bot: true });
+      } finally {
+        botRunActive = false;
+        scheduleBotIfNeeded();
+      }
     }
 
-    function runBotExpansionActions(s, bot) {
+    function chooseBotExpansionAction(s, bot) {
       if (isExpansion(s, "credits") && !s.turn.marketBought) {
-        if (bot.hp < bot.maxHp && bot.credits >= MARKET_ITEMS.medGel.cost) purchaseMarketItemState(s, bot.id, "medGel");
-        else if (!bot.equipment.clone && bot.credits >= MARKET_ITEMS.clone.cost) purchaseMarketItemState(s, bot.id, "clone");
-        else if (!bot.equipment.goldScope && bot.credits >= MARKET_ITEMS.scope.cost) purchaseMarketItemState(s, bot.id, "scope");
-        else if (bot.credits >= MARKET_ITEMS.shieldPack.cost && bot.hand.filter(c => c.type === "shield").length < 2) purchaseMarketItemState(s, bot.id, "shieldPack");
+        if (bot.hp < bot.maxHp && bot.credits >= MARKET_ITEMS.medGel.cost) return { kind: "market", itemId: "medGel" };
+        if (!bot.equipment.clone && bot.credits >= MARKET_ITEMS.clone.cost) return { kind: "market", itemId: "clone" };
+        if (!bot.equipment.goldScope && bot.credits >= MARKET_ITEMS.scope.cost) return { kind: "market", itemId: "scope" };
+        if (bot.credits >= MARKET_ITEMS.shieldPack.cost && bot.hand.filter(c => c.type === "shield").length < 2) return { kind: "market", itemId: "shieldPack" };
       }
       if (isExpansion(s, "train") && !s.turn.cargoClaimed && bot.hand.length >= 5 && s.train.cargo.length) {
-        claimTrainCargoState(s, bot.id, s.train.cargo[Math.floor(Math.random() * s.train.cargo.length)]);
+        return { kind: "cargo", cargoId: s.train.cargo[Math.floor(Math.random() * s.train.cargo.length)] };
       }
+      return null;
+    }
+
+    function applyBotExpansionAction(s, bot, action) {
+      if (action.kind === "market") purchaseMarketItemState(s, bot.id, action.itemId);
+      if (action.kind === "cargo") claimTrainCargoState(s, bot.id, action.cargoId);
     }
 
     function chooseBotMove(s, bot) {
@@ -1989,6 +2058,61 @@
       return null;
     }
 
+    function armPhoneBackGuard() {
+      try { history.pushState({ zapBackGuard: true, at: Date.now() }, "", location.href); } catch {}
+    }
+
+    function hideMissionHistory() {
+      els.logHistory.classList.add("hidden");
+      els.logToggle.textContent = "Show mission history";
+    }
+
+    function openExitPrompt() {
+      if (!state || !me) return;
+      exitPromptOpen = true;
+      clearTimeout(botTimer);
+      els.exitMessage.textContent = practiceMode
+        ? "This practice mission will end if you exit. Stay in the game or return to the Zap opening screen?"
+        : "Your room and seat will stay saved, so you can use Resume Room from the Zap opening screen.";
+      els.exitModal.classList.remove("hidden");
+      els.stayInGameBtn.focus();
+    }
+
+    function closeExitPrompt() {
+      exitPromptOpen = false;
+      els.exitModal.classList.add("hidden");
+      scheduleBotIfNeeded();
+    }
+
+    async function confirmExitGame() {
+      exitPromptOpen = false;
+      els.exitModal.classList.add("hidden");
+      await leaveToHome(false);
+    }
+
+    function handlePhoneBack() {
+      if (!els.exitModal.classList.contains("hidden")) {
+        closeExitPrompt();
+        armPhoneBackGuard();
+        return;
+      }
+      if (!els.rulesModal.classList.contains("hidden")) {
+        closeRules();
+        armPhoneBackGuard();
+        return;
+      }
+      if (state && !els.logHistory.classList.contains("hidden")) {
+        hideMissionHistory();
+        armPhoneBackGuard();
+        return;
+      }
+      if (state && me && (!els.lobby.classList.contains("hidden") || !els.game.classList.contains("hidden"))) {
+        openExitPrompt();
+        armPhoneBackGuard();
+      }
+      // On Zap's opening screen, do not re-arm the guard. A second Back press may close the app normally.
+    }
+
     function openRules() { els.rulesModal.classList.remove("hidden"); }
     function closeRules() { els.rulesModal.classList.add("hidden"); }
 
@@ -2014,6 +2138,9 @@
 
     async function leaveToHome(clearIdentity = false) {
       clearTimeout(botTimer);
+      botRunActive = false;
+      exitPromptOpen = false;
+      els.exitModal.classList.add("hidden");
       if (channel && client) {
         try { await client.removeChannel(channel); } catch {}
       }
@@ -2081,6 +2208,10 @@
         const hidden = els.logHistory.classList.toggle("hidden");
         els.logToggle.textContent = hidden ? "Show mission history" : "Hide mission history";
       });
+      els.stayInGameBtn.addEventListener("click", closeExitPrompt);
+      els.confirmExitBtn.addEventListener("click", confirmExitGame);
+      els.exitModal.addEventListener("click", e => { if (e.target === els.exitModal) closeExitPrompt(); });
+      window.addEventListener("popstate", handlePhoneBack);
       window.addEventListener("beforeunload", () => { if (channel && client) client.removeChannel(channel); });
     }
 
@@ -2101,6 +2232,7 @@
         els.joinBtn.disabled = true;
       }
       updateResumeButton();
+      armPhoneBackGuard();
       registerServiceWorker();
     }
 
