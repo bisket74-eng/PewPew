@@ -106,6 +106,9 @@
     .topbar-logo span { color: var(--cyan); }
     .identity-peek { position: fixed; top: calc(max(0px, env(safe-area-inset-top)) + 52px); left: 50%; z-index: 29; transform: translateX(-50%); min-height: 24px; max-width: calc(100vw - 110px); padding: 3px 13px 4px; border-radius: 0 0 12px 12px; color: #d9faff; background: rgba(17,27,54,.94); border: 1px solid rgba(85,231,255,.28); border-top: 0; box-shadow: 0 7px 18px rgba(0,0,0,.28); font-size: 10px; line-height: 1.1; font-weight: 950; letter-spacing: .04em; white-space: nowrap; cursor: pointer; backdrop-filter: blur(14px); }
     .identity-peek:active { transform: translateX(-50%) translateY(1px); }
+    .bot-speed-btn { flex: 0 0 auto; min-height: 30px; padding: 5px 8px; border-radius: 10px; color: var(--text); background: rgba(121,139,217,.15); border: 1px solid rgba(149,165,236,.26); font-size: 9px; line-height: 1; font-weight: 950; letter-spacing: .015em; white-space: nowrap; cursor: pointer; }
+    .bot-speed-btn:active { transform: translateY(1px); }
+    .bot-speed-btn.fast-active { color: #071217; background: var(--cyan); border-color: rgba(255,255,255,.62); }
     .room-pill, .status-pill { border-radius: 999px; padding: 7px 10px; background: rgba(105,123,202,.12); border: 1px solid rgba(141,163,255,.2); font-size: 11px; font-weight: 900; letter-spacing: .07em; }
     .status-pill { display: flex; align-items: center; gap: 6px; letter-spacing: 0; color: var(--muted); }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); box-shadow: 0 0 12px currentColor; }
@@ -1176,6 +1179,7 @@
     <main id="gameScreen" class="screen hidden">
       <header class="topbar">
         <div class="topbar-logo">Za<span>p</span></div>
+        <button id="botSpeedBtn" class="bot-speed-btn hidden" type="button">Slow Down</button>
         <div id="gameRoomPill" class="room-pill">----</div>
         <div id="gameStatus" class="status-pill"><i class="dot"></i><span>Syncing</span></div>
         <button class="icon-btn rules-btn" aria-label="How to play">?</button>
@@ -2084,7 +2088,7 @@
       lobbyCode: $("lobbyCode"), playerCount: $("playerCount"), lobbyPlayers: $("lobbyPlayers"), lobbyMessage: $("lobbyMessage"),
       expansionGrid: $("expansionGrid"), expansionSummary: $("expansionSummary"), expansionHelp: $("expansionHelp"),
       hostControls: $("hostControls"), guestWaiting: $("guestWaiting"), addBotBtn: $("addBotBtn"), removeBotBtn: $("removeBotBtn"), startGameBtn: $("startGameBtn"),
-      lobbyStatus: $("lobbyStatus"), gameStatus: $("gameStatus"), gameRoomPill: $("gameRoomPill"),
+      lobbyStatus: $("lobbyStatus"), gameStatus: $("gameStatus"), gameRoomPill: $("gameRoomPill"), botSpeedBtn: $("botSpeedBtn"),
       myRoleBanner: $("myRoleBanner"), identityPeek: $("identityPeek"), expansionPanel: $("expansionPanel"), playersTable: $("playersTable"), crewStatusLabel: $("crewStatusLabel"),
       currentLog: $("currentLog"), logToggle: $("logToggle"), logHistory: $("logHistory"),
       handZone: $("handZone"), cards: $("cards"), handCount: $("handCount"), handInstruction: $("handInstruction"), endTurnBtn: $("endTurnBtn"),
@@ -2953,6 +2957,50 @@
     }
 
     const BOT_ACTION_DISPLAY_MS = 5000;
+    const BOT_SPECTATOR_FAST_MS = 650;
+    const BOT_SPECTATOR_URGENCY_ACTIONS = 12;
+
+    function onlyBotsRemain(s = state) {
+      if (!s || s.phase !== "playing") return false;
+      const living = (s.players || []).filter(player => player.alive);
+      return living.some(player => player.bot) && !living.some(player => !player.bot);
+    }
+
+    function botSpectatorFastActive(s = state) {
+      return onlyBotsRemain(s) && !s.botSpectatorSlow;
+    }
+
+    function botActionDelay(s = state) {
+      if (!botSpectatorFastActive(s)) return BOT_ACTION_DISPLAY_MS;
+      const effect = s?.lastEffect;
+      if (effect?.eliminatedIds?.length) {
+        const elapsed = Math.max(0, Date.now() - Number(effect.at || 0));
+        if (elapsed < ACTION_RETURN_TO_HAND_MS) return Math.max(BOT_SPECTATOR_FAST_MS, ACTION_RETURN_TO_HAND_MS - elapsed);
+      }
+      return BOT_SPECTATOR_FAST_MS;
+    }
+
+    function livingBotProgressSnapshot(s) {
+      const living = (s?.players || []).filter(player => player.alive);
+      return {
+        onlyBots: onlyBotsRemain(s),
+        alive: living.length,
+        hp: living.reduce((sum, player) => sum + Math.max(0, Number(player.hp) || 0), 0)
+      };
+    }
+
+    function updateBotSpectatorProgress(s, before) {
+      const after = livingBotProgressSnapshot(s);
+      if (!after.onlyBots) {
+        s.botSpectatorNoDamageActions = 0;
+        return;
+      }
+      if (!before?.onlyBots || after.alive < before.alive || after.hp < before.hp) {
+        s.botSpectatorNoDamageActions = 0;
+        return;
+      }
+      s.botSpectatorNoDamageActions = Math.max(0, Number(s.botSpectatorNoDamageActions) || 0) + 1;
+    }
 
     function onlineConfigured() {
       return SUPABASE_URL.startsWith("https://") && !SUPABASE_URL.includes("YOUR_") && SUPABASE_KEY.length > 20 && !SUPABASE_KEY.includes("YOUR_");
@@ -3012,6 +3060,8 @@
       s.roundSystem = { deck: [], discard: [], active: null, showDeck: [], showDiscard: [], showActive: null, circuit: 0, round: 1, ...savedRoundSystem };
       if (!hadSavedRound) s.roundSystem.round = Math.max(1, Number(s.roundSystem.circuit || 0) + 1);
       s.train = s.train || { station: 0, cargo: [] };
+      s.botSpectatorSlow = !!s.botSpectatorSlow;
+      s.botSpectatorNoDamageActions = Math.max(0, Number(s.botSpectatorNoDamageActions) || 0);
       s.players = s.players || [];
       const pilotPool = pilotPoolForState(s);
       s.players.forEach((p, index) => {
@@ -3326,6 +3376,8 @@
         logs: [{ id: randomId("log"), text: `${creator.name} opened the ${themeSettings({ theme }).roomLabel.toLowerCase()}.`, at: Date.now() }],
         lastEffect: null,
         winner: null,
+        botSpectatorSlow: false,
+        botSpectatorNoDamageActions: 0,
         createdAt: Date.now()
       };
     }
@@ -4092,6 +4144,8 @@
       s.discard = [];
       s.lastEffect = null;
       s.winner = null;
+      s.botSpectatorSlow = false;
+      s.botSpectatorNoDamageActions = 0;
       s.roundSystem = {
         deck: buildRoundEventDeck(s), discard: [], active: null,
         showDeck: buildShowEventDeck(s), showDiscard: [], showActive: null, circuit: 0, round: 1
@@ -5176,12 +5230,34 @@
       return `<span class="battery-dots" aria-label="${amount} of ${MAX_DEVICE_LOAD} ${escapeHtml(resource)}">${Array.from({ length: MAX_DEVICE_LOAD }, (_, i) => `<span class="battery-dot ${i < amount ? "on" : ""}"></span>`).join("")}</span>`;
     }
 
+    function renderBotSpeedControl() {
+      if (!els.botSpeedBtn) return;
+      const visible = onlyBotsRemain(state);
+      els.botSpeedBtn.classList.toggle("hidden", !visible);
+      if (!visible) return;
+      const fast = botSpectatorFastActive(state);
+      els.botSpeedBtn.textContent = fast ? "Slow Down" : "Speed Up";
+      els.botSpeedBtn.classList.toggle("fast-active", fast);
+      els.botSpeedBtn.setAttribute("aria-label", fast ? "Slow the remaining bot turns to normal speed" : "Speed up the remaining bot turns");
+      els.botSpeedBtn.title = fast ? "Bots are playing quickly. Tap for normal speed." : "Bots are playing at normal speed. Tap to speed them up.";
+    }
+
+    async function toggleBotSpectatorSpeed() {
+      if (!onlyBotsRemain(state)) return;
+      await mutate((s) => {
+        if (!onlyBotsRemain(s)) return;
+        s.botSpectatorSlow = !s.botSpectatorSlow;
+        addLog(s, s.botSpectatorSlow ? "Bot spectator speed returned to normal." : "Bot spectator speed increased.");
+      });
+    }
+
     function renderGame() {
       const mine = myPlayer();
       const theme = themeSettings(state);
       const role = themeRole(mine.role, state);
       const pilot = themePilotById(mine.pilot, state);
       els.gameRoomPill.textContent = roomCode;
+      renderBotSpeedControl();
       if (practiceMode) setStatus(els.gameStatus, "live", "Practice");
       els.myRoleBanner.style.setProperty("--role-glow", role.color);
       const showVoice = !practiceMode && voiceSupported();
@@ -6072,6 +6148,8 @@
         s.turn = null;
         s.lastEffect = null;
         s.winner = null;
+        s.botSpectatorSlow = false;
+        s.botSpectatorNoDamageActions = 0;
         s.roundSystem = { deck: [], discard: [], active: null, showDeck: [], showDiscard: [], showActive: null, circuit: 0 };
         s.train = { station: 0, cargo: [] };
         s.players.forEach(p => {
@@ -6098,7 +6176,7 @@
       const bot = currentPlayer();
       if (!bot?.bot || !bot.alive) return;
       const expectedTurn = state.turn.number;
-      botTimer = setTimeout(() => runBotTurn(bot.id, expectedTurn), BOT_ACTION_DISPLAY_MS);
+      botTimer = setTimeout(() => runBotTurn(bot.id, expectedTurn), botActionDelay(state));
     }
 
     async function runBotTurn(botId, expectedTurn) {
@@ -6122,25 +6200,29 @@
               endedTurn = true;
               return;
             }
+            const progressBefore = livingBotProgressSnapshot(s);
 
             const expansionAction = chooseBotExpansionAction(s, bot);
             if (expansionAction) {
               applyBotExpansionAction(s, bot, expansionAction);
+              updateBotSpectatorProgress(s, progressBefore);
               return;
             }
 
             const move = chooseBotMove(s, bot);
             if (move) {
               playCardState(s, bot.id, move.cardUid, move.targetId || null, { boost: !!move.boost });
+              updateBotSpectatorProgress(s, progressBefore);
               return;
             }
 
             endTurnState(s, bot.id);
+            updateBotSpectatorProgress(s, progressBefore);
             endedTurn = true;
           }, { bot: true });
 
           if (endedTurn || !state || state.phase !== "playing" || state.turn.playerId !== botId || state.turn.number !== expectedTurn) break;
-          await sleep(BOT_ACTION_DISPLAY_MS);
+          await sleep(botActionDelay(state));
         }
       } finally {
         botRunActive = false;
@@ -6367,13 +6449,14 @@
       return 0.25;
     }
 
-    function chooseBotTarget(s, bot, cardType, extraCheck = null) {
+    function chooseBotTarget(s, bot, cardType, extraCheck = null, minimumScore = null) {
       const ranked = s.players
         .filter(target => target.alive && target.id !== bot.id && canTarget(s, bot, target, cardType) && (!extraCheck || extraCheck(target)))
         .map(target => ({ target, score: botTargetScore(s, bot, target, cardType) }))
         .sort((a, b) => b.score - a.score || a.target.seat - b.target.seat);
       const best = ranked[0];
-      return best && best.score >= botTargetThreshold(bot, cardType) ? best.target : null;
+      const threshold = minimumScore == null ? botTargetThreshold(bot, cardType) : minimumScore;
+      return best && best.score >= threshold ? best.target : null;
     }
 
     function botAreaAttackScore(s, bot, cardType) {
@@ -6391,6 +6474,33 @@
       return total;
     }
 
+    function chooseBotUrgentAttack(s, bot) {
+      const cardOf = (type) => bot.hand.find(card => card.type === type);
+      const stored = totalStoredLoads(bot);
+      const minimum = -2;
+      const zap = cardOf("zap");
+      if (zap && s.turn.attacksUsed < attackLimitForPlayer(s, bot)) {
+        const target = chooseBotTarget(s, bot, "zap", null, minimum);
+        if (target) return { cardUid: zap.uid, targetId: target.id };
+      }
+      const chargedBlast = cardOf("chargeShot");
+      if (chargedBlast && s.turn.attacksUsed < attackLimitForPlayer(s, bot)) {
+        const target = chooseBotTarget(s, bot, "chargeShot", null, minimum);
+        if (target) return { cardUid: chargedBlast.uid, targetId: target.id, boost: stored > 0 };
+      }
+      for (const type of ["rapidVolley", "arcBolt", "pulse"]) {
+        const card = cardOf(type);
+        if (!card) continue;
+        const target = chooseBotTarget(s, bot, type, null, minimum);
+        if (target) return { cardUid: card.uid, targetId: target.id, boost: type !== "pulse" && stored > 0 };
+      }
+      const rift = cardOf("rift");
+      if (rift && botAreaAttackScore(s, bot, "rift") >= 0) return { cardUid: rift.uid };
+      const sweep = cardOf("sweep");
+      if (sweep && botAreaAttackScore(s, bot, "sweep") >= 0) return { cardUid: sweep.uid };
+      return null;
+    }
+
     function chooseBotMove(s, bot) {
       ensureBotMind(s, bot);
       const cardOf = (type) => bot.hand.find(card => card.type === type);
@@ -6401,6 +6511,11 @@
         player.equipment.weapon || player.equipment.suit || player.equipment.drone || player.equipment.decoy ||
         player.equipment.goldScope || player.equipment.clone || chargedGearEntries(player).length
       );
+
+      if (onlyBotsRemain(s) && Number(s.botSpectatorNoDamageActions || 0) >= BOT_SPECTATOR_URGENCY_ACTIONS) {
+        const urgentAttack = chooseBotUrgentAttack(s, bot);
+        if (urgentAttack) return urgentAttack;
+      }
 
       // Survival and recovery first.
       if (bot.hp === 1) {
@@ -6745,6 +6860,16 @@
             <li>Turn on <b>Boost next ${escapeHtml(theme.chargedActionLabel)}</b> to spend 1 stored ${escapeHtml(theme.storedSingular)} and strengthen the next eligible action.</li>
             <li>${escapeHtml(chargedName)} adds 28 cards total: 13 ${escapeHtml(theme.chargedGearLabel)} cards, 9 different ${escapeHtml(theme.chargedActionLabel)} cards, 4 extra ${escapeHtml(attackName)} cards, 1 extra ${escapeHtml(defenseName)} and 1 extra ${escapeHtml(repairName)}. It also adds 8 possible ${escapeHtml(theme.chargedCharacterLabel)} cards.</li>
           </ul>`;
+
+        let botSpectatorSection = $("botSpectatorRulesGuide");
+        if (!botSpectatorSection) {
+          botSpectatorSection = document.createElement("div");
+          botSpectatorSection.id = "botSpectatorRulesGuide";
+          botSpectatorSection.className = "rules-section";
+          rulesBody.parentElement.appendChild(botSpectatorSection);
+        }
+        botSpectatorSection.innerHTML = `<h3>Watching bots finish</h3>
+          <p>When every human player has been eliminated but bots are still playing, bot turns automatically speed up. A small <b>Slow Down</b> button appears in the top bar immediately to the left of the room code. Tap it to return the bots to normal viewing speed; the button then changes to <b>Speed Up</b>. The control stays hidden while any human player is still alive.</p>`;
       }
     }
 
@@ -6772,6 +6897,7 @@
       els.removeBotBtn.addEventListener("click", removeBot);
       els.startGameBtn.addEventListener("click", startGame);
       els.endTurnBtn.addEventListener("click", endMyTurn);
+      els.botSpeedBtn?.addEventListener("click", toggleBotSpectatorSpeed);
       els.logToggle.addEventListener("click", () => {
         const hidden = els.logHistory.classList.toggle("hidden");
         const theme = themeSettings(state);
