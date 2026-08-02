@@ -1694,19 +1694,15 @@
        card sitting behind every hand card. */
     .card-art-detail { display: none !important; }
 
-    /* Portraits open the same player-details sheet as the name strip. */
+    /* Player portraits are decorative. Only the name strip opens details. */
     .seat-avatar {
       padding: 0;
       color: inherit;
-      cursor: pointer;
-      -webkit-appearance: none;
-      appearance: none;
+      cursor: default;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-select: none;
     }
-    .seat-avatar:focus-visible {
-      outline: 3px solid rgba(255,255,255,.88);
-      outline-offset: 2px;
-    }
-    .seat-avatar:active { transform: translate(-50%, -56%) scale(.96); }
 
     /* Keep the meaning icon fully visible and place the number beside it.
        Each corner remains one compact chip, but the value no longer covers
@@ -2130,7 +2126,7 @@
       emp: { name: "EMP Spike", icon: "🔻", type: "Action", target: "player", glow: "rgba(255,217,106,.32)", desc: "Remove a random equipped item, or one random card, from a player in firing range." },
       duel: { name: "Signal Duel", icon: "⇄", type: "Attack", target: "player", glow: "rgba(255,97,122,.30)", desc: "The target and attacker alternate discarding Zap cards. The first player unable to answer takes 1 damage." },
       sweep: { name: "System Sweep", icon: "🌐", type: "Attack", target: "all", glow: "rgba(255,97,122,.30)", desc: "Deal 1 damage to every other living player. Deflectors still work unless disabled." },
-      raidWave: { name: "Drone Swarm", icon: "✦", type: "Attack", target: "all", glow: "rgba(255,97,122,.30)", desc: "Every other living player must discard a Zap card or take 1 damage. Deflectors do not stop this damage." },
+      raidWave: { name: "Drone Swarm", icon: "✦", type: "Attack", target: "all", glow: "rgba(255,97,122,.30)", desc: "Each other living player chooses: discard a Zap card or take 1 damage. Deflectors do not stop this damage." },
       supplyDrop: { name: "Supply Drop", icon: "▦", type: "Action", target: "all", glow: "rgba(255,217,106,.30)", desc: "Reveal one card per living player and distribute one to each player in turn order." },
       groupHeal: { name: "Med Bay", icon: "✚", type: "Recovery", target: "all", glow: "rgba(98,243,169,.34)", desc: "Restore 1 health to every living player, up to each maximum." },
 
@@ -2346,7 +2342,7 @@
       emp: { name: "Disarm", icon: "⌫", type: "Action", shortDesc: "Disable gear or discard 1 card." },
       duel: { name: "High Noon Duel", icon: "⇄", type: "Attack", shortDesc: "Trade Crack cards until one fails.", desc: "The target and attacker alternate discarding Crack cards. The first player unable to answer takes 1 damage." },
       sweep: { name: "Crossfire", icon: "✹", type: "Attack", shortDesc: "Attack every other player." },
-      raidWave: { name: "Rival Posse", icon: "✦", type: "Attack", shortDesc: "Discard a Crack or take 1.", desc: "Every other living player must discard a Crack card or take 1 damage. Dodge cards do not stop this damage." },
+      raidWave: { name: "Rival Posse", icon: "✦", type: "Attack", shortDesc: "Discard a Crack or take 1.", desc: "Each other living player chooses: discard a Crack card or take 1 damage. Dodge cards do not stop this damage." },
       supplyDrop: { name: "General Store", icon: "▦", type: "Action", shortDesc: "One revealed card per player.", desc: "Reveal one card per living player and distribute one to each player in turn order." },
       groupHeal: { name: "Saloon", icon: "✚", type: "Recovery", shortDesc: "Heal every living player 1.", desc: "Restore 1 health to every living player, up to each maximum." },
       drone: { name: "Pack Mule", icon: "♘", type: "Gear", shortDesc: "Draw +1 each turn." },
@@ -2509,7 +2505,7 @@
       containment:{name:"Energy Cage",icon:"▣",type:"Control",shortDesc:"May skip a non-Champion turn.",desc:"Place on another non-Champion player. At the start of their turn, it is discarded: they have a 1-in-4 chance to act, otherwise their turn is skipped."},
       tractor:{name:"Energy Snare",icon:"∿",type:"Action",shortDesc:"Take 1 card from a nearby player."},
       emp:{name:"Power Nullifier",icon:"⌫",type:"Action",shortDesc:"Disable gear or discard 1 card."}, duel:{name:"Showdown",icon:"⇄",type:"Attack",shortDesc:"Trade Pow cards until one fails.",desc:"The target and attacker alternate discarding Pow cards. The first player unable to answer takes 1 damage."},
-      sweep:{name:"Shockwave",icon:"✹",type:"Attack",shortDesc:"Attack every other player."}, raidWave:{name:"Minion Rush",icon:"✦",type:"Attack",shortDesc:"Discard a Pow or take 1.",desc:"Every other living player must discard a Pow card or take 1 damage. Block cards do not stop this damage."},
+      sweep:{name:"Shockwave",icon:"✹",type:"Attack",shortDesc:"Attack every other player."}, raidWave:{name:"Minion Rush",icon:"✦",type:"Attack",shortDesc:"Discard a Pow or take 1.",desc:"Each other living player chooses: discard a Pow card or take 1 damage. Block cards do not stop this damage."},
       supplyDrop:{name:"Team Cache",icon:"▦",type:"Action",shortDesc:"One revealed card per player.",desc:"Reveal one card per living player and distribute one to each player in turn order."}, groupHeal:{name:"Healing Wave",icon:"✚",type:"Recovery",shortDesc:"Heal every living player 1.",desc:"Restore 1 health to every living player, up to each maximum."},
       drone:{name:"Helper Drone",icon:"◆",type:"Gear",shortDesc:"Draw +1 each turn."}, decoy:{name:"Hologram Double",icon:"◯",type:"Gear",shortDesc:"Blocks 1 hit, then is discarded."},
       pulse:{name:"Quick Jab",icon:"✦",type:"Strike",shortDesc:"Deal 1 nearby damage."}, swap:{name:"Mind Swap",icon:"⇄",type:"Action",shortDesc:"Trade 1 random card each."},
@@ -2929,10 +2925,23 @@
       return "";
     }
 
+    function resolveAutomaticPendingDecisions(s) {
+      let safety = 0;
+      while (s.pendingDecision && safety++ < 32) {
+        const chooser = playerById(s, s.pendingDecision.playerId);
+        if (!chooser?.bot) break;
+        const choice = chooseBotPendingDecision(s, s.pendingDecision);
+        resolvePendingDecisionState(s, chooser.id, choice);
+      }
+    }
+
     async function resolvePendingDecision(choiceKey) {
       const decision = state?.pendingDecision;
       if (!decision || decision.playerId !== me?.id) return;
-      await mutate(s => resolvePendingDecisionState(s, me.id, choiceKey));
+      await mutate(s => {
+        resolvePendingDecisionState(s, me.id, choiceKey);
+        resolveAutomaticPendingDecisions(s);
+      });
     }
 
     function renderPendingDecisionModal() {
@@ -4619,7 +4628,7 @@
     function myPlayer() { return state && me ? playerById(state, me.id) : null; }
     function isHost() { return state && me && state.hostId === me.id; }
     function currentPlayer(s = state) { return s?.turn ? playerById(s, s.turn.playerId) : null; }
-    function isMyTurn() { const p = currentPlayer(); return !!(p && me && p.id === me.id && state.phase === "playing" && p.alive); }
+    function isMyTurn() { const p = currentPlayer(); return !!(p && me && p.id === me.id && state.phase === "playing" && p.alive && !state.pendingDecision); }
 
     function identityKey(code) { return `zap_identity_${code}`; }
     function saveIdentity(code, player) {
@@ -6223,24 +6232,25 @@
           break;
         }
         case "raidWave": {
-          const targets = s.players.filter(p => p.alive && p.id !== actor.id);
-          effect.targetIds = targets.map(p => p.id);
-          let answered = 0;
-          let damaged = 0;
-          for (const other of targets) {
-            if (s.phase !== "playing") break;
-            const attackIndex = other.hand.findIndex(item => item.type === "zap");
-            if (attackIndex >= 0) {
-              const [answer] = other.hand.splice(attackIndex, 1);
-              discardCard(s, answer);
-              answered += 1;
-            } else {
-              const outcome = resolveDamage(s, actor, other, 1, logCardName("raidWave", s), { ignoreShields: true });
-              noteDamageResult(other, outcome);
-              damaged += outcome.hit;
-            }
+          const targets = s.players
+            .filter(player => player.alive && player.id !== actor.id)
+            .sort((a, b) => {
+              const da = (a.seat - actor.seat + s.players.length) % s.players.length;
+              const db = (b.seat - actor.seat + s.players.length) % s.players.length;
+              return da - db;
+            });
+          effect.targetIds = targets.map(player => player.id);
+          addLog(s, `${actor.name} used ${logCardName("raidWave", s)}. Each other player must choose whether to discard ${logCardName("zap", s)} or take 1 damage.`);
+          if (targets.length) {
+            s.pendingDecision = {
+              id: randomId("decision"),
+              kind: "raidWave",
+              sourceId: actor.id,
+              playerId: targets[0].id,
+              queue: targets.map(player => player.id),
+              index: 0
+            };
           }
-          addLog(s, `${actor.name} used ${logCardName("raidWave", s)}. ${answered} player${answered === 1 ? "" : "s"} discarded ${logCardName("zap", s)}; ${damaged} damage was dealt.`);
           break;
         }
         case "supplyDrop": {
@@ -6395,6 +6405,7 @@
 
       observeCardPlayForBots(s, actor, effect);
       s.lastEffect = effect;
+      resolveAutomaticPendingDecisions(s);
       determineWinner(s);
     }
 
@@ -7060,6 +7071,7 @@
       renderExpansionPanel();
       renderHand();
       renderGameOver();
+      renderPendingDecisionModal();
       queueCardEffect(state.lastEffect);
       syncTurnViewport();
       requestAnimationFrame(updateIdentityPeek);
@@ -7104,7 +7116,7 @@
       return `
         <article class="seat ${positionClass} ${turnPlayer?.id === p.id && state.phase === "playing" ? "current" : ""} ${p.id === me.id ? "you" : ""} ${!p.alive ? "dead" : ""} ${targetable.includes(p.id) ? "targetable" : ""} ${confirming ? "target-confirming" : ""}" data-player-id="${p.id}">
           <div class="seat-face">
-            <button class="seat-avatar" type="button" data-player-info-id="${p.id}" aria-label="Open details for ${escapeHtml(p.name)}">${playerAvatar(p, state)}</button>
+            <div class="seat-avatar" aria-hidden="true">${playerAvatar(p, state)}</div>
             <div class="seat-stat seat-health-badge" title="Health: ${p.hp} of ${p.maxHp}" aria-label="Health ${p.hp} of ${p.maxHp}"><span class="seat-stat-icon">♥</span><span class="seat-stat-value">${p.hp}</span></div>
             <div class="seat-stat seat-cards-badge" title="Cards in hand: ${p.hand.length}" aria-label="${p.hand.length} cards in hand"><span class="seat-stat-icon">🂠</span><span class="seat-stat-value">${p.hand.length}</span></div>
             <div class="seat-stat seat-distance-badge" title="Effective distance from you: ${distance}" aria-label="Effective distance from you ${distance}"><span class="seat-stat-icon">📏</span><span class="seat-stat-value">${distance}</span></div>
@@ -8091,6 +8103,7 @@
     function scheduleBotIfNeeded() {
       clearTimeout(botTimer);
       if (!state || state.phase !== "playing" || exitPromptOpen) return;
+      if (state.pendingDecision) return;
       if (!practiceMode && !isHost()) return;
       if (botRunActive) return;
       const bot = currentPlayer();
