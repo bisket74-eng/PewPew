@@ -119,14 +119,14 @@
     .room-hero { text-align: center; padding: 18px 14px; }
     .eyebrow { color: var(--cyan); font-weight: 900; text-transform: uppercase; letter-spacing: .13em; font-size: 11px; }
     .code-display {
-      font-size: clamp(52px, 17vw, 88px);
-      letter-spacing: .15em;
-      line-height: 1;
+      font-size: clamp(66px, 22vw, 108px);
+      letter-spacing: .16em;
+      line-height: .95;
       font-weight: 1000;
       font-variant-numeric: tabular-nums;
-      margin: 8px 0 12px;
-      padding: 7px 0 7px .15em;
-      text-shadow: 0 2px 2px rgba(0,0,0,.45), 0 0 30px rgba(85,231,255,.28);
+      margin: 10px 0 14px;
+      padding: 9px 0 10px .16em;
+      text-shadow: 0 3px 3px rgba(0,0,0,.48), 0 0 34px rgba(85,231,255,.32);
     }
     .room-help { color: var(--muted); font-size: 13px; }
 
@@ -148,7 +148,7 @@
     .join-inline .field { margin: 0; }
     .join-inline .btn { min-height: 54px; }
     .join-helper { margin: 8px 2px 0; color: var(--muted); font-size: 11px; line-height: 1.4; text-align: center; }
-    .code-copy-button { width: 100%; color: inherit; font: inherit; border: 0; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent;  padding: 0; touch-action: manipulation; }
+    .code-copy-button { width: 100%; color: inherit; font-family: inherit; border: 0; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; padding: 0; touch-action: manipulation; }
     .code-copy-button:active { transform: scale(.985); }
     .code-copy-button:focus-visible { outline: 3px solid rgba(85,231,255,.62); outline-offset: 5px; border-radius: 16px; }
     .seat-setup-panel { display: grid; gap: 12px; }
@@ -1202,6 +1202,8 @@
     .rules-item-detail .guide-card-count { margin-left: 5px; font-size: 8px; }
     .rules-item-detail .rules-chevron { width: 23px; height: 23px; border: 0; background: transparent; font-size: 14px; }
     .rules-item-copy { margin: 0; padding: 9px 10px 10px; color: var(--muted); font-size: 10.5px; line-height: 1.48; }
+    .rules-item-expanded .rules-item-static-head { min-height: 42px; padding: 9px 10px; display: flex; align-items: center; border-bottom: 1px solid rgba(141,163,255,.10); }
+    .rules-item-expanded .rules-item-copy { color: #cbd2ee; }
     .rules-list { margin: 0; padding: 5px 9px 4px 26px; }
     .rules-list li { margin: 5px 0; color: #c6cdea; font-size: 10.5px; line-height: 1.45; }
     .rules-expansion-stack { display: grid; gap: 8px; }
@@ -8738,8 +8740,12 @@
       return `<span class="rules-summary-copy"><span class="rules-summary-title">${title}</span>${subtitle ? `<span class="rules-summary-sub">${subtitle}</span>` : ""}</span><span class="rules-summary-side">${side}<span class="rules-chevron" aria-hidden="true">⌄</span></span>`;
     }
 
-    function rulesItemHtml(title, description, badge = "") {
-      return `<details class="rules-item-detail"><summary><span class="rules-item-name">${title}${badge ? `<em class="guide-card-count">${badge}</em>` : ""}</span><span class="rules-chevron" aria-hidden="true">⌄</span></summary><p class="rules-item-copy">${description}</p></details>`;
+    function rulesItemHtml(title, description, badge = "", expanded = false) {
+      const heading = `<span class="rules-item-name">${title}${badge ? `<em class="guide-card-count">${badge}</em>` : ""}</span>`;
+      if (expanded) {
+        return `<div class="rules-item-detail rules-item-expanded"><div class="rules-item-static-head">${heading}</div><p class="rules-item-copy">${description}</p></div>`;
+      }
+      return `<details class="rules-item-detail"><summary>${heading}<span class="rules-chevron" aria-hidden="true">⌄</span></summary><p class="rules-item-copy">${description}</p></details>`;
     }
 
     function rulesSubgroupHtml(title, subtitle, body) {
@@ -8826,12 +8832,12 @@
 
       const roleBody = ["commander", "sentinel", "raider", "rogue"].map(id => {
         const role = themeRole(id);
-        return rulesItemHtml(`${escapeHtml(theme.roleSymbols[id])} ${escapeHtml(role.name)}`, escapeHtml(role.goal));
-      }).join("") + rulesItemHtml("Role mix by player count", `4 players: 1 ${escapeHtml(commander.name)}, 2 ${escapeHtml(enemy.name)}s and 1 ${escapeHtml(themeRole("rogue").name)}. Five players add 1 ${escapeHtml(ally.name)}. Six use 1 ${escapeHtml(ally.name)} and 3 ${escapeHtml(enemy.name)}s. Seven use 2 ${escapeHtml(ally.name)}s and 3 ${escapeHtml(enemy.name)}s. The optional eighth seat adds a second ${escapeHtml(themeRole("rogue").name)}.`);
+        return rulesItemHtml(`${escapeHtml(theme.roleSymbols[id])} ${escapeHtml(role.name)}`, escapeHtml(role.goal), "", true);
+      }).join("") + rulesItemHtml("Role mix by player count", `4 players: 1 ${escapeHtml(commander.name)}, 2 ${escapeHtml(enemy.name)}s and 1 ${escapeHtml(themeRole("rogue").name)}. Five players add 1 ${escapeHtml(ally.name)}. Six use 1 ${escapeHtml(ally.name)} and 3 ${escapeHtml(enemy.name)}s. Seven use 2 ${escapeHtml(ally.name)}s and 3 ${escapeHtml(enemy.name)}s. The optional eighth seat adds a second ${escapeHtml(themeRole("rogue").name)}.`, "", true);
 
       const characterBody = BASE_PILOT_IDS.map(id => {
         const pilot = themePilotById(id);
-        return rulesItemHtml(`${escapeHtml(pilot.mark)} · ${escapeHtml(pilot.name)} · ♥${pilot.health}`, `<strong>${escapeHtml(pilot.abilityName)}:</strong> ${escapeHtml(pilot.ability)}`);
+        return rulesItemHtml(`${escapeHtml(pilot.mark)} · ${escapeHtml(pilot.name)} · ♥${pilot.health}`, `<strong>${escapeHtml(pilot.abilityName)}:</strong> ${escapeHtml(pilot.ability)}`, "", true);
       }).join("");
 
       const turnBody = `<ul class="rules-list">
@@ -8845,15 +8851,15 @@
 
       const baseCardBody = Object.keys(BASE_DECK_COUNTS).filter(type => Number(BASE_DECK_COUNTS[type]) > 0).map(type => {
         const card = themeCard(type);
-        return rulesItemHtml(`${escapeHtml(card.icon)} ${escapeHtml(card.name)}`, escapeHtml(card.desc), `×${BASE_DECK_COUNTS[type]}`);
+        return rulesItemHtml(`${escapeHtml(card.icon)} ${escapeHtml(card.name)}`, escapeHtml(card.desc), `×${BASE_DECK_COUNTS[type]}`, true);
       }).join("");
 
       const baseBody = `<p class="rules-intro-note">${escapeHtml(theme.rulesIntro)} Only the cards in this Base Game section are always shuffled into every game.</p>
+        ${rulesSubgroupHtml("1. Secret roles", "Open to see every role and goal", roleBody)}
+        ${rulesSubgroupHtml("2. Base cards", `${Object.values(BASE_DECK_COUNTS).reduce((sum, count) => sum + Number(count || 0), 0)} cards always included · all shown when opened`, baseCardBody)}
+        ${rulesSubgroupHtml(`3. Face-up ${escapeHtml(theme.characterPlural)}`, "Open to see every character and power", characterBody)}
         ${rulesSubgroupHtml("Overview", escapeHtml(theme.rulesHeading), `<p class="rules-item-copy">${escapeHtml(theme.rulesIntro)}</p>`)}
-        ${rulesSubgroupHtml("Secret roles", "Goals and player-count mix", roleBody)}
-        ${rulesSubgroupHtml(`Face-up ${escapeHtml(theme.characterPlural)}`, "Open one character to read its power", characterBody)}
         ${rulesSubgroupHtml("Your turn and the table", "Draw, act, target and end the turn", turnBody)}
-        ${rulesSubgroupHtml("Base cards", `${Object.values(BASE_DECK_COUNTS).reduce((sum, count) => sum + Number(count || 0), 0)} cards always included`, baseCardBody)}
         ${rulesSubgroupHtml("Eliminations", "Rewards and penalties", `<ul class="rules-list"><li>A ${escapeHtml(defense.name)} in your hand automatically blocks one point of damage unless a rule says otherwise.</li><li>Eliminating a ${escapeHtml(enemy.name)} earns three cards.</li><li>If the ${escapeHtml(commander.name)} eliminates a ${escapeHtml(ally.name)}, the ${escapeHtml(commander.name)} loses every card and equipped item.</li></ul>`)}
         ${rulesSubgroupHtml("Voice and bot viewing", "Optional interface features", `<ul class="rules-list"><li>In online rooms, each person taps the microphone once and grants permission. Hold it to talk and release it to stop.</li><li>If all human players are eliminated, bot turns speed up automatically. Use the top-bar speed button to slow them down again.</li></ul>`)}`;
 
