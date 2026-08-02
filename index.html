@@ -1136,6 +1136,9 @@
 
     .modal-backdrop { position: fixed; inset: 0; z-index: 100; display: grid; align-items: end; background: rgba(0,0,0,.62); backdrop-filter: blur(8px); padding: 14px; }
     .modal { width: min(100%, 650px); max-height: 88dvh; overflow: auto; margin: 0 auto; border-radius: 25px 25px 18px 18px; background: linear-gradient(180deg, #202a52, #11172f); border: 1px solid rgba(150,168,245,.28); box-shadow: 0 -20px 60px rgba(0,0,0,.4); padding: 17px; }
+    /* Help is a centered, nearly full-screen window rather than a bottom sheet. */
+    #rulesModal { align-items: center; padding: max(12px, env(safe-area-inset-top)) 14px max(12px, env(safe-area-inset-bottom)); }
+    #rulesModal .modal { height: min(92dvh, 920px); max-height: 92dvh; margin: auto; border-radius: 25px; box-shadow: 0 20px 60px rgba(0,0,0,.46); }
     .modal-head { position: sticky; top: -17px; background: rgba(29,38,75,.96); backdrop-filter: blur(14px); margin: -17px -17px 12px; padding: 15px 17px 12px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(141,163,255,.16); }
     .modal-head h2 { margin: 0; font-size: 20px; flex: 1; }
     .exit-modal { max-width: 430px; }
@@ -1183,24 +1186,25 @@
     .rules-summary-copy { min-width: 0; }
     .rules-summary-title { display: block; color: var(--text); font-size: 15px; line-height: 1.15; font-weight: 950; }
     .rules-summary-sub { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.35; font-weight: 700; }
-    .rules-summary-side { display: inline-flex; align-items: center; gap: 7px; }
+    .rules-summary-side { display: inline-flex; align-items: center; align-self: center; gap: 7px; }
     .rules-selection-pill { max-width: 94px; padding: 4px 7px; border-radius: 999px; color: var(--muted); background: rgba(121,139,217,.10); border: 1px solid rgba(149,165,236,.18); font-size: 8px; line-height: 1.15; font-weight: 950; text-align: center; text-transform: uppercase; letter-spacing: .055em; }
     .rules-selection-pill.on { color: #071217; background: var(--cyan); border-color: rgba(255,255,255,.62); }
-    .rules-chevron { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 10px; color: var(--cyan); background: rgba(85,231,255,.08); border: 1px solid rgba(85,231,255,.20); font-size: 19px; line-height: 1; transition: transform .18s ease; }
-    details[open] > summary .rules-chevron { transform: rotate(180deg); }
+    .rules-chevron { position: relative; width: 25px; height: 25px; flex: 0 0 25px; display: grid; place-items: center; align-self: center; justify-self: end; color: var(--cyan); background: transparent; border: 0; font-size: 0; line-height: 0; }
+    .rules-chevron::before { content: ""; width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-2px) rotate(45deg); transform-origin: center; transition: transform .18s ease; }
+    details[open] > summary .rules-chevron::before { transform: translateY(2px) rotate(225deg); }
     .rules-major-body { padding: 10px 12px 13px; }
     .rules-intro-note { margin: 0 0 9px; padding: 10px 11px; border-radius: 13px; color: #cbd2ee; background: rgba(85,231,255,.055); border: 1px solid rgba(85,231,255,.14); font-size: 10.5px; line-height: 1.45; }
     .rules-subgroup > summary { min-height: 48px; padding: 10px 11px; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 9px; }
     .rules-subgroup[open] > summary { border-bottom: 1px solid rgba(141,163,255,.12); }
     .rules-subgroup .rules-summary-title { font-size: 12px; }
     .rules-subgroup .rules-summary-sub { font-size: 9px; }
-    .rules-subgroup .rules-chevron { width: 27px; height: 27px; border-radius: 9px; font-size: 16px; }
+    .rules-subgroup .rules-chevron { width: 25px; height: 25px; }
     .rules-subgroup-body { padding: 3px 9px 10px; }
     .rules-item-detail > summary { min-height: 42px; padding: 9px 10px; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 8px; }
     .rules-item-detail[open] > summary { border-bottom: 1px solid rgba(141,163,255,.10); }
     .rules-item-name { min-width: 0; color: var(--text); font-size: 11px; line-height: 1.25; font-weight: 900; }
     .rules-item-detail .guide-card-count { margin-left: 5px; font-size: 8px; }
-    .rules-item-detail .rules-chevron { width: 23px; height: 23px; border: 0; background: transparent; font-size: 14px; }
+    .rules-item-detail .rules-chevron { width: 23px; height: 23px; }
     .rules-item-copy { margin: 0; padding: 9px 10px 10px; color: var(--muted); font-size: 10.5px; line-height: 1.48; }
     .rules-item-expanded .rules-item-static-head { min-height: 42px; padding: 9px 10px; display: flex; align-items: center; border-bottom: 1px solid rgba(141,163,255,.10); }
     .rules-item-expanded .rules-item-copy { color: #cbd2ee; }
@@ -8669,7 +8673,14 @@
       // On Zap's opening screen, do not re-arm the guard. A second Back press may close the app normally.
     }
 
-    function openRules() { els.rulesModal.classList.remove("hidden"); }
+    function openRules() {
+      installRulesGuide();
+      const base = els.rulesAccordion?.querySelector("[data-rules-base]");
+      if (base) base.open = true;
+      els.rulesModal.classList.remove("hidden");
+      const modal = els.rulesModal.querySelector(".modal");
+      if (modal) modal.scrollTop = 0;
+    }
     function closeRules() { els.rulesModal.classList.add("hidden"); }
 
     async function leaveLobby() {
@@ -8750,7 +8761,7 @@
     }
 
     function rulesSummaryHtml(title, subtitle = "", side = "") {
-      return `<span class="rules-summary-copy"><span class="rules-summary-title">${title}</span>${subtitle ? `<span class="rules-summary-sub">${subtitle}</span>` : ""}</span><span class="rules-summary-side">${side}<span class="rules-chevron" aria-hidden="true">⌄</span></span>`;
+      return `<span class="rules-summary-copy"><span class="rules-summary-title">${title}</span>${subtitle ? `<span class="rules-summary-sub">${subtitle}</span>` : ""}</span><span class="rules-summary-side">${side}<span class="rules-chevron" aria-hidden="true"></span></span>`;
     }
 
     function rulesItemHtml(title, description, badge = "", expanded = false) {
@@ -8758,7 +8769,7 @@
       if (expanded) {
         return `<div class="rules-item-detail rules-item-expanded"><div class="rules-item-static-head">${heading}</div><p class="rules-item-copy">${description}</p></div>`;
       }
-      return `<details class="rules-item-detail"><summary>${heading}<span class="rules-chevron" aria-hidden="true">⌄</span></summary><p class="rules-item-copy">${description}</p></details>`;
+      return `<details class="rules-item-detail"><summary>${heading}<span class="rules-chevron" aria-hidden="true"></span></summary><p class="rules-item-copy">${description}</p></details>`;
     }
 
     function rulesSubgroupHtml(title, subtitle, body) {
@@ -8802,30 +8813,30 @@
       const groups = [];
       const cards = expansionCardEntries(expansionId, s);
       if (cards.length) {
-        const cardBody = cards.map(({ card, count }) => rulesItemHtml(`${escapeHtml(card.icon)} ${escapeHtml(card.name)}`, escapeHtml(card.desc), `×${count}`)).join("");
+        const cardBody = cards.map(({ card, count }) => rulesItemHtml(`${escapeHtml(card.icon)} ${escapeHtml(card.name)}`, escapeHtml(card.desc), `×${count}`, true)).join("");
         groups.push(rulesSubgroupHtml("Cards", `${cards.reduce((sum, item) => sum + item.count, 0)} cards added when selected`, cardBody));
       }
       if (expansionId === "orbit" || expansionId === "chaos") {
         const ids = expansionId === "orbit" ? ["tailwind", "closeOrbit", "maintenance", "lowPower", "jammed"] : ["crossfire", "openVaults", "shieldBlackout", "gravityWell", "salvageWave"];
         const events = ids.map(id => themeRoundEvent(id, s)).filter(Boolean);
-        groups.push(rulesSubgroupHtml("Round events", "One active rule affects everyone", events.map(event => rulesItemHtml(`${escapeHtml(event.icon)} ${escapeHtml(event.name)}`, escapeHtml(event.desc))).join("")));
+        groups.push(rulesSubgroupHtml("Round events", "One active rule affects everyone", events.map(event => rulesItemHtml(`${escapeHtml(event.icon)} ${escapeHtml(event.name)}`, escapeHtml(event.desc), "", true)).join("")));
       }
       if (expansionId === "show") {
         const events = Object.keys(SHOW_EVENTS).map(id => themeShowEvent(id, s)).filter(Boolean);
-        groups.push(rulesSubgroupHtml("Show events", escapeHtml(theme.showTriggerLabel), events.map(event => rulesItemHtml(`${escapeHtml(event.icon)} ${escapeHtml(event.name)}`, escapeHtml(event.desc))).join("")));
+        groups.push(rulesSubgroupHtml("Show events", escapeHtml(theme.showTriggerLabel), events.map(event => rulesItemHtml(`${escapeHtml(event.icon)} ${escapeHtml(event.name)}`, escapeHtml(event.desc), "", true)).join("")));
       }
       if (expansionId === "credits") {
         const items = Object.keys(MARKET_ITEMS).map(id => themeMarketItem(id, s));
-        groups.push(rulesSubgroupHtml("Market", `Earn ${escapeHtml(theme.currencyPlural)} by causing damage`, items.map(item => rulesItemHtml(`${escapeHtml(item.icon)} ${escapeHtml(item.name)}`, escapeHtml(item.desc), `${item.cost} ${escapeHtml(item.cost === 1 ? theme.currencySingular : theme.currencyPlural)}`)).join("")));
+        groups.push(rulesSubgroupHtml("Market", `Earn ${escapeHtml(theme.currencyPlural)} by causing damage`, items.map(item => rulesItemHtml(`${escapeHtml(item.icon)} ${escapeHtml(item.name)}`, escapeHtml(item.desc), `${item.cost} ${escapeHtml(item.cost === 1 ? theme.currencySingular : theme.currencyPlural)}`, true)).join("")));
       }
       if (expansionId === "charged") {
         const pilots = CHARGED_PILOT_IDS.map(id => themePilotById(id, s));
-        groups.push(rulesSubgroupHtml(escapeHtml(theme.chargedCharacterLabel + "s"), `8 optional ${escapeHtml(theme.characterLabel.toLowerCase())} cards`, pilots.map(pilot => rulesItemHtml(`${escapeHtml(pilot.mark)} · ${escapeHtml(pilot.name)} · ♥${pilot.health}`, `<strong>${escapeHtml(pilot.abilityName)}:</strong> ${escapeHtml(pilot.ability)}`)).join("")));
+        groups.push(rulesSubgroupHtml(escapeHtml(theme.chargedCharacterLabel + "s"), `8 optional ${escapeHtml(theme.characterLabel.toLowerCase())} cards`, pilots.map(pilot => rulesItemHtml(`${escapeHtml(pilot.mark)} · ${escapeHtml(pilot.name)} · ♥${pilot.health}`, `<strong>${escapeHtml(pilot.abilityName)}:</strong> ${escapeHtml(pilot.ability)}`, "", true)).join("")));
         groups.push(rulesSubgroupHtml("Batteries and reloads", "How Charged cards operate", `<ul class="rules-list"><li>${escapeHtml(theme.chargedGearLabel)} enters play with 3 ${escapeHtml(theme.storedPlural)} and is discarded when empty.</li><li>Normal ${escapeHtml(theme.equipmentNoun)} and required end-of-turn discards create ${escapeHtml(theme.loadPlural)}.</li><li>Waiting ${escapeHtml(theme.loadPlural)} must be placed before ending the turn. Turn on Boost to strengthen the next eligible ${escapeHtml(theme.chargedActionLabel)}.</li></ul>`));
       }
       if (expansionId === "train") {
         const cargo = Object.keys(TRAIN_CARGO).map(id => themeCargo(id, s));
-        groups.push(rulesSubgroupHtml("Cargo rewards", `Discard 2 cards to claim one during your turn`, cargo.map(item => rulesItemHtml(`${escapeHtml(item.icon)} ${escapeHtml(item.name)}`, escapeHtml(item.desc))).join("")));
+        groups.push(rulesSubgroupHtml("Cargo rewards", `Discard 2 cards to claim one during your turn`, cargo.map(item => rulesItemHtml(`${escapeHtml(item.icon)} ${escapeHtml(item.name)}`, escapeHtml(item.desc), "", true)).join("")));
       }
       if (expansionId === "legends") {
         groups.push(rulesSubgroupHtml("Fame and ascension", "Permanent reward at 3 fame", `<ul class="rules-list"><li>Successful damage and eliminations can earn ${escapeHtml(theme.fameLabel)}.</li><li>At 3 ${escapeHtml(theme.fameLabel)}, your ${escapeHtml(theme.characterLabel.toLowerCase())} becomes ${escapeHtml(theme.legendaryLabel)} and gains +1 maximum health, +1 range and +1 draw.</li></ul>`));
@@ -8858,7 +8869,7 @@
         <li>Tap a card to use it. For a targeted card, tap an outlined player and then confirm the action.</li>
         <li>Normally you may use one ${escapeHtml(theme.attackNoun)} per turn. Some ${escapeHtml(theme.characterPlural.toLowerCase())}, equipment and events change this.</li>
         <li>♥ is health, 🂠 is hand size, 📏 is effective distance from you, and 🎯 is ${escapeHtml(theme.rangeNoun)}.</li>
-        <li>Tap a player's face or name to see their ${escapeHtml(theme.characterLabel.toLowerCase())}, visible role information and equipment.</li>
+        <li>Tap a player's name to see their ${escapeHtml(theme.characterLabel.toLowerCase())}, visible role information and equipment.</li>
         <li>When finished, tap End Turn. If your hand is larger than your health, choose the exact excess cards to discard and then confirm.</li>
       </ul>`;
 
@@ -8884,7 +8895,7 @@
       }).join("")}</div>`;
 
       els.rulesAccordion.innerHTML = `
-        <details class="rules-major"><summary>${rulesSummaryHtml(`Base Game · ${escapeHtml(theme.title)}`, "Roles, characters, turn rules and the always-included cards", `<span class="rules-selection-pill on">Always on</span>`)}</summary><div class="rules-major-body">${baseBody}</div></details>
+        <details class="rules-major" data-rules-base open><summary>${rulesSummaryHtml(`Base Game · ${escapeHtml(theme.title)}`, "Roles, characters, turn rules and the always-included cards", `<span class="rules-selection-pill on">Always on</span>`)}</summary><div class="rules-major-body">${baseBody}</div></details>
         <details class="rules-major"><summary>${rulesSummaryHtml(escapeHtml(theme.expansionTitle), "Open an expansion to see exactly what it adds", `<span class="rules-selection-pill">${Object.keys(EXPANSIONS).length} options</span>`)}</summary><div class="rules-major-body">${expansionBody}</div></details>`;
     }
 
