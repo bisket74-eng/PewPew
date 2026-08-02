@@ -1154,11 +1154,67 @@
     .guide-card-count { display: inline-flex; align-items: center; justify-content: center; min-width: 31px; margin-left: 7px; padding: 2px 7px; border-radius: 999px; color: #eef3ff; background: rgba(85,231,255,.12); border: 1px solid rgba(85,231,255,.24); font-size: 10px; font-style: normal; font-weight: 800; vertical-align: 1px; }
     .card-count-note { margin: -1px 0 8px !important; color: var(--muted) !important; font-size: 11px !important; }
 
+
+    /* Compact, nested Help accordions. */
+    .rules-accordion { display: grid; gap: 10px; padding: 2px 0 8px; }
+    .rules-major,
+    .rules-subgroup,
+    .rules-item-detail { overflow: hidden; border: 1px solid rgba(141,163,255,.16); background: rgba(7,11,27,.32); }
+    .rules-major { border-radius: 18px; }
+    .rules-subgroup { margin-top: 8px; border-radius: 14px; background: rgba(7,11,27,.26); }
+    .rules-item-detail { margin-top: 7px; border-radius: 12px; background: rgba(255,255,255,.025); }
+    .rules-major > summary,
+    .rules-subgroup > summary,
+    .rules-item-detail > summary { list-style: none; cursor: pointer; user-select: none; -webkit-user-select: none; }
+    .rules-major > summary::-webkit-details-marker,
+    .rules-subgroup > summary::-webkit-details-marker,
+    .rules-item-detail > summary::-webkit-details-marker { display: none; }
+    .rules-major > summary { min-height: 66px; padding: 13px 14px; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 10px; }
+    .rules-major[open] > summary { border-bottom: 1px solid rgba(141,163,255,.14); background: rgba(85,231,255,.045); }
+    .rules-summary-copy { min-width: 0; }
+    .rules-summary-title { display: block; color: var(--text); font-size: 15px; line-height: 1.15; font-weight: 950; }
+    .rules-summary-sub { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.35; font-weight: 700; }
+    .rules-summary-side { display: inline-flex; align-items: center; gap: 7px; }
+    .rules-selection-pill { max-width: 94px; padding: 4px 7px; border-radius: 999px; color: var(--muted); background: rgba(121,139,217,.10); border: 1px solid rgba(149,165,236,.18); font-size: 8px; line-height: 1.15; font-weight: 950; text-align: center; text-transform: uppercase; letter-spacing: .055em; }
+    .rules-selection-pill.on { color: #071217; background: var(--cyan); border-color: rgba(255,255,255,.62); }
+    .rules-chevron { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 10px; color: var(--cyan); background: rgba(85,231,255,.08); border: 1px solid rgba(85,231,255,.20); font-size: 19px; line-height: 1; transition: transform .18s ease; }
+    details[open] > summary .rules-chevron { transform: rotate(180deg); }
+    .rules-major-body { padding: 10px 12px 13px; }
+    .rules-intro-note { margin: 0 0 9px; padding: 10px 11px; border-radius: 13px; color: #cbd2ee; background: rgba(85,231,255,.055); border: 1px solid rgba(85,231,255,.14); font-size: 10.5px; line-height: 1.45; }
+    .rules-subgroup > summary { min-height: 48px; padding: 10px 11px; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 9px; }
+    .rules-subgroup[open] > summary { border-bottom: 1px solid rgba(141,163,255,.12); }
+    .rules-subgroup .rules-summary-title { font-size: 12px; }
+    .rules-subgroup .rules-summary-sub { font-size: 9px; }
+    .rules-subgroup .rules-chevron { width: 27px; height: 27px; border-radius: 9px; font-size: 16px; }
+    .rules-subgroup-body { padding: 3px 9px 10px; }
+    .rules-item-detail > summary { min-height: 42px; padding: 9px 10px; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 8px; }
+    .rules-item-detail[open] > summary { border-bottom: 1px solid rgba(141,163,255,.10); }
+    .rules-item-name { min-width: 0; color: var(--text); font-size: 11px; line-height: 1.25; font-weight: 900; }
+    .rules-item-detail .guide-card-count { margin-left: 5px; font-size: 8px; }
+    .rules-item-detail .rules-chevron { width: 23px; height: 23px; border: 0; background: transparent; font-size: 14px; }
+    .rules-item-copy { margin: 0; padding: 9px 10px 10px; color: var(--muted); font-size: 10.5px; line-height: 1.48; }
+    .rules-list { margin: 0; padding: 5px 9px 4px 26px; }
+    .rules-list li { margin: 5px 0; color: #c6cdea; font-size: 10.5px; line-height: 1.45; }
+    .rules-expansion-stack { display: grid; gap: 8px; }
+
+    /* Each lobby expansion keeps its selection box and can independently reveal its contents. */
+    .expansion-option { display: block; padding: 0; overflow: hidden; }
+    .expansion-option-head { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 8px; padding: 10px 10px 10px 11px; }
+    .expansion-info-toggle { min-width: 0; width: 100%; padding: 0; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 8px; color: var(--text); text-align: left; background: transparent; border: 0; cursor: pointer; }
+    .expansion-info-toggle:focus-visible { outline: 3px solid rgba(85,231,255,.50); outline-offset: 3px; border-radius: 9px; }
+    .expansion-info-arrow { width: 29px; height: 29px; display: grid; place-items: center; border-radius: 9px; color: var(--cyan); background: rgba(85,231,255,.07); border: 1px solid rgba(85,231,255,.18); font-size: 17px; transition: transform .18s ease; }
+    .expansion-info-toggle[aria-expanded="true"] .expansion-info-arrow { transform: rotate(180deg); }
+    .expansion-option-details { padding: 9px 11px 11px; border-top: 1px solid rgba(141,163,255,.12); background: rgba(4,8,20,.20); }
+    .expansion-detail-label { margin: 0 0 5px; color: var(--cyan); font-size: 9px; font-weight: 950; text-transform: uppercase; letter-spacing: .07em; }
+    .expansion-detail-copy { margin: 0; color: var(--muted); font-size: 9.5px; line-height: 1.4; }
+    .expansion-mini-list { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+    .expansion-mini-chip { padding: 4px 6px; border-radius: 999px; color: #dfe5fb; background: rgba(121,139,217,.10); border: 1px solid rgba(149,165,236,.16); font-size: 8px; line-height: 1.15; font-weight: 800; }
+
     .toast-stack { position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(calc(100% - 28px), 500px); display: grid; gap: 8px; z-index: 150; pointer-events: none; }
     .toast { padding: 12px 14px; border-radius: 14px; color: white; background: rgba(23,31,62,.96); border: 1px solid rgba(141,163,255,.27); box-shadow: 0 12px 30px rgba(0,0,0,.35); font-size: 12px; text-align: center; animation: toastIn .2s ease; }
     @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } }
 
-    .theme-picker { margin: -5px auto 18px; padding: 10px; border-radius: 18px; background: rgba(10,15,34,.44); border: 1px solid rgba(141,163,255,.15); }
+    .theme-picker { margin: -5px auto 12px; padding: 10px 10px 7px; border-radius: 18px; background: rgba(10,15,34,.44); border: 1px solid rgba(141,163,255,.15); }
     .theme-picker-title { margin: 0 0 8px; color: var(--muted); text-align: center; font-size: 11px; font-weight: 950; letter-spacing: .09em; text-transform: uppercase; }
     .theme-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .theme-choice { min-height: 55px; border-radius: 14px; padding: 9px 10px; color: var(--text); text-align: left; background: rgba(121,139,217,.10); border: 2px solid rgba(149,165,236,.18); cursor: pointer; }
@@ -1166,7 +1222,6 @@
     .theme-choice span { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; line-height: 1.3; }
     .theme-choice.active { border-color: var(--cyan); background: rgba(85,231,255,.10); box-shadow: 0 0 0 2px rgba(85,231,255,.08), inset 0 0 18px rgba(85,231,255,.04); }
     .theme-choice:focus-visible { outline: 3px solid rgba(255,255,255,.72); outline-offset: 2px; }
-    .theme-picker-note { margin: 7px 2px 0; color: var(--muted); text-align: center; font-size: 9.5px; line-height: 1.35; }
 
     body[data-game-theme="western"] {
       --bg: #1b1009;
@@ -1702,6 +1757,45 @@
       .seat-stat-value { right: 3px; min-width: 19px; height: 22px; font-size: 15px; }
     }
 
+  
+
+    /* Keep the microphone matched to the selected skin. Red is reserved for
+       the large press-and-hold rings, not the button face itself. */
+    .voice-talk-btn {
+      --voice-rest-bg: linear-gradient(160deg, rgba(63,78,139,.96), rgba(25,33,72,.98));
+      --voice-rest-border: rgba(132,226,255,.42);
+      background: var(--voice-rest-bg);
+      border-color: var(--voice-rest-border);
+    }
+    body[data-game-theme="western"] .voice-talk-btn {
+      --voice-rest-bg: linear-gradient(160deg, rgba(118,72,40,.98), rgba(57,32,18,.98));
+      --voice-rest-border: rgba(245,210,133,.45);
+    }
+    body[data-game-theme="detective"] .voice-talk-btn {
+      --voice-rest-bg: linear-gradient(160deg, rgba(64,75,72,.98), rgba(20,24,24,.98));
+      --voice-rest-border: rgba(234,199,119,.42);
+    }
+    body[data-game-theme="superhero"] .voice-talk-btn {
+      --voice-rest-bg: linear-gradient(160deg, rgba(45,81,146,.99), rgba(10,26,61,.99));
+      --voice-rest-border: rgba(255,229,99,.48);
+    }
+    .voice-talk-btn:active:not(.voice-error),
+    .voice-talk-btn.talking:not(.voice-error) {
+      color: #fff;
+      background: var(--voice-rest-bg);
+      border-color: var(--voice-rest-border);
+      box-shadow: 0 0 0 7px rgba(255,62,98,.26), 0 0 0 17px rgba(255,62,98,.14), 0 0 46px 18px rgba(255,49,92,.74);
+    }
+
+    /* Leave a real slice of the next card showing whenever more cards remain. */
+    .cards { padding-right: 30px; scroll-padding-right: 30px; }
+    .card {
+      flex-basis: clamp(145px, calc((100% - 37px) / 2), 160px);
+      scroll-snap-stop: always;
+    }
+
+    .choice-modal.state-decision .choice-option-btn { min-height: 58px; }
+
   </style>
 </head>
 <body>
@@ -1721,7 +1815,6 @@
           <button class="theme-choice" type="button" data-theme-choice="detective" role="radio" aria-checked="false"><b>◆ Retro Crime · Pop!</b><span>Detectives, Mobsters and a 1970s–80s case-file look</span></button>
           <button class="theme-choice" type="button" data-theme-choice="superhero" role="radio" aria-checked="false"><b>⚡ Superhero · Pow!</b><span>Champions, Villains and bold comic-book action</span></button>
         </div>
-        <p id="themePickerNote" class="theme-picker-note">The host chooses once. Everyone in the room sees the same theme, while all rules and game mechanics remain shared.</p>
       </section>
 
       <div class="home-grid single">
@@ -1858,46 +1951,7 @@
         <h2 id="rulesTitle">How to Play</h2>
         <button id="closeRulesBtn" class="icon-btn" aria-label="Close rules">×</button>
       </header>
-      <div class="rules-section">
-        <h3>The mission</h3>
-        <p>Zap is a 4–8 player hidden-role space battle. Each person plays on their own phone. The Commander is public; every other role stays secret until that player is eliminated. Every player also receives a face-up Pilot with a public special ability.</p>
-      </div>
-      <div class="rules-section">
-        <h3>Secret roles</h3>
-        <div class="role-grid">
-          <div class="guide-item"><b>🪐 Commander</b><span>Stay alive and eliminate every Raider and the Rogue Unit.</span></div>
-          <div class="guide-item"><b>🛡️ Sentinel</b><span>Secretly protect the Commander. You share the Commander’s victory.</span></div>
-          <div class="guide-item"><b>☄️ Raider</b><span>Eliminate the Commander. Raiders win together unless the Rogue is the only survivor.</span></div>
-          <div class="guide-item"><b>🤖 Rogue Unit</b><span>Become the final surviving player.</span></div>
-        </div>
-      </div>
-      <div class="rules-section">
-        <h3>Face-up pilots</h3>
-        <p>Roles are secret, but Pilot cards are public. Tap any Pilot name on the crew table to read that Pilot's printed health and special ability. The Commander receives 1 health above the Pilot's printed health.</p>
-        <div id="rulesPilots" class="role-grid"></div>
-      </div>
-      <div class="rules-section">
-        <h3>Your turn</h3>
-        <ul>
-          <li>You automatically draw two cards.</li>
-          <li>Tap a card to use it. Cards that do not need a target play immediately.</li>
-          <li>For a target card, the players you can reach receive a thick rose-colored double outline. Tap an outlined player card, then tap the small confirmation button such as “Zap?”</li>
-          <li>Play as many cards as you want. Normally you may use one Zap attack per turn; certain Pilots and mission events increase that limit.</li>
-          <li>The player cards form an oval table. Starting with you, the layout alternates along the two sides so nearby seats appear first and farther seats continue down the oval. The thin dark center represents the table.</li>
-          <li>On each player card: ♥ is health, 🂠 is hand size, 📏 is the current effective distance from you, and 🎯 is that player's firing range. Special equipment and character abilities are already included in those numbers.</li>
-          <li>Tap a player's name to open their details. Your role and the public Commander are visible; other secret roles show a question mark until game rules reveal them. Equipment inside the details page can be tapped for an explanation.</li>
-          <li>Cards you do not play stay in your hand. When you end your turn, your hand limit equals your current health. For example, at 3 health you can keep 3 cards. If you have extras, choose the exact cards you want to discard before the turn ends.</li>
-        </ul>
-      </div>
-      <div class="rules-section">
-        <h3>Cards</h3>
-        <p class="card-count-note">The count label shows the base-deck copies and any extra copies added by an expansion. Expansion cards are included only when their module is selected.</p>
-        <div id="rulesCards" class="card-guide"></div>
-      </div>
-      <div class="rules-section">
-        <h3>Eliminations</h3>
-        <p>A Deflector in your hand automatically blocks one point of damage. Eliminating a Raider earns three cards. If the Commander accidentally eliminates a Sentinel, the Commander loses every card and equipped item.</p>
-      </div>
+      <div id="rulesAccordion" class="rules-accordion"></div>
     </section>
   </div>
 
@@ -2662,15 +2716,20 @@
       return null;
     }
 
-    function closeCardChoiceModal() {
+    function closeCardChoiceModal(force = false) {
+      if (!force && cardChoiceRequest?.stateDecision) return;
       cardChoiceRequest = null;
       els.cardChoiceModal.classList.add("hidden");
+      els.cardChoiceModal.querySelector(".choice-modal")?.classList.remove("state-decision");
+      els.cardChoiceCancelBtn.classList.remove("hidden");
       els.cardChoiceOptions.innerHTML = "";
       els.cardChoiceBody.textContent = "";
     }
 
     function openCardChoiceModal(config, onChoose) {
       cardChoiceRequest = { onChoose };
+      els.cardChoiceCancelBtn.classList.remove("hidden");
+      els.cardChoiceModal.querySelector(".choice-modal")?.classList.remove("state-decision");
       els.cardChoiceTitle.textContent = config.title || "Choose an effect";
       els.cardChoiceBody.textContent = config.body || "";
       els.cardChoiceOptions.innerHTML = (config.options || []).map(option => `<button class="choice-option-btn ${option.key === config.preferred ? "primary" : ""}" type="button" data-choice-key="${escapeHtml(option.key)}"><strong>${escapeHtml(option.label)}</strong>${option.desc ? `<small>${escapeHtml(option.desc)}</small>` : ""}</button>`).join("");
@@ -2679,9 +2738,209 @@
         const option = (config.options || []).find(item => item.key === node.dataset.choiceKey);
         if (!option || !cardChoiceRequest) return;
         const callback = cardChoiceRequest.onChoose;
-        closeCardChoiceModal();
+        closeCardChoiceModal(true);
         await callback(option.payload || {});
       }));
+    }
+
+
+
+    function pendingAttackCardIndex(player) {
+      if (!player) return -1;
+      const zapIndex = player.hand.findIndex(card => card.type === "zap");
+      if (zapIndex >= 0) return zapIndex;
+      return player.pilot === "celeste" ? player.hand.findIndex(card => card.type === "shield") : -1;
+    }
+
+    function finalizeTurnDraw(s, player, drawnCount) {
+      addLog(s, `${player.name}'s turn — Round ${currentRoundNumber(s)}. Drew ${drawnCount} card${drawnCount === 1 ? "" : "s"}.`);
+      checkEmptyHandDraw(s, player);
+      if (player.bot) autoAllocatePendingLoads(s, player);
+    }
+
+    function pendingDecisionView(decision, s = state) {
+      if (!decision) return null;
+      const player = playerById(s, decision.playerId);
+      if (!player) return null;
+      const attackName = logCardName("zap", s);
+      if (decision.kind === "raidWave") {
+        const canDiscard = pendingAttackCardIndex(player) >= 0;
+        const options = [];
+        if (canDiscard) options.push({ key: "discard", label: `Discard 1 ${attackName}`, desc: "Avoid the damage." });
+        options.push({ key: "damage", label: "Take 1 damage", desc: canDiscard ? `Keep your ${attackName} card and lose 1 health.` : `You do not have a ${attackName} card available.` });
+        return { title: `${themeCard("raidWave", s).name} — choose`, body: `${player.name}, choose how to answer.`, options };
+      }
+      if (decision.kind === "duel") {
+        const canDiscard = pendingAttackCardIndex(player) >= 0;
+        const options = [];
+        if (canDiscard) options.push({ key: "discard", label: `Discard 1 ${attackName}`, desc: `Continue the ${themeCard("duel", s).name}.` });
+        options.push({ key: "damage", label: "Stop and take 1 damage", desc: canDiscard ? `Keep your ${attackName} card and end the duel.` : `You cannot answer without a ${attackName} card.` });
+        return { title: `${themeCard("duel", s).name} — your response`, body: `${player.name}, choose whether to answer or take the damage.`, options };
+      }
+      if (decision.kind === "drawSource") {
+        const options = [{ key: "deck", label: "Draw from the deck", desc: "Take the normal draw from the deck." }];
+        (decision.candidateIds || []).forEach(id => {
+          const target = playerById(s, id);
+          if (target?.alive && target.hand.length) options.push({ key: `player:${id}`, label: `Take from ${target.name}`, desc: `Take one random card from ${target.name}, then draw the rest from the deck.` });
+        });
+        return { title: `${logPilotAbility(player, s)} — choose first draw`, body: "Choose the source of your first normal draw.", options };
+      }
+      if (decision.kind === "discardDraw") {
+        const top = s.discard[s.discard.length - 1];
+        const options = [{ key: "deck", label: "Draw from the deck", desc: "Leave the discard pile alone and draw normally." }];
+        if (top) options.unshift({ key: "discard", label: `Take ${themeCard(top.type, s)?.name || "the top discard"}`, desc: "Use the top discarded card as your first draw." });
+        return { title: `${logPilotAbility(player, s)} — choose first draw`, body: "Choose the top discard or the draw deck.", options };
+      }
+      if (decision.kind === "topThree") {
+        const cards = decision.cards || [];
+        return {
+          title: `${logPilotAbility(player, s)} — choose 2 cards`,
+          body: "Tap the one card to return to the top of the deck. You keep the other two.",
+          options: cards.map(card => ({ key: card.uid, label: `Return ${themeCard(card.type, s)?.name || "this card"}`, desc: "Keep the other two cards." }))
+        };
+      }
+      return null;
+    }
+
+    function nextPendingPlayer(s, decision) {
+      const queue = decision.queue || [];
+      for (let i = (decision.index || 0) + 1; i < queue.length; i++) {
+        const candidate = playerById(s, queue[i]);
+        if (candidate?.alive) return { id: candidate.id, index: i };
+      }
+      return null;
+    }
+
+    function resolvePendingDecisionState(s, actorId, choiceKey) {
+      const decision = s.pendingDecision;
+      if (!decision || decision.playerId !== actorId) throw new Error("That choice is no longer waiting for you.");
+      const player = playerById(s, actorId);
+      if (!player?.alive) { s.pendingDecision = null; return; }
+
+      if (decision.kind === "raidWave") {
+        const source = playerById(s, decision.sourceId);
+        if (choiceKey === "discard") {
+          const index = pendingAttackCardIndex(player);
+          if (index < 0) throw new Error(`You do not have a ${logCardName("zap", s)} card to discard.`);
+          const [answer] = player.hand.splice(index, 1);
+          discardCard(s, answer);
+          addLog(s, `${player.name} discarded ${logCardName(answer.type, s)} to avoid ${themeCard("raidWave", s).name}.`);
+          checkEmptyHandDraw(s, player);
+        } else {
+          const outcome = resolveDamage(s, source, player, 1, themeCard("raidWave", s).name, { ignoreShields: true });
+          if (s.lastEffect && outcome?.eliminatedIds?.length) outcome.eliminatedIds.forEach(id => { if (!s.lastEffect.eliminatedTargetIds.includes(id)) s.lastEffect.eliminatedTargetIds.push(id); });
+        }
+        if (s.phase !== "playing") { s.pendingDecision = null; return; }
+        const next = nextPendingPlayer(s, decision);
+        if (next) s.pendingDecision = { ...decision, id: randomId("decision"), playerId: next.id, index: next.index };
+        else { s.pendingDecision = null; addLog(s, `${themeCard("raidWave", s).name} finished resolving.`); }
+        determineWinner(s);
+        return;
+      }
+
+      if (decision.kind === "duel") {
+        const other = playerById(s, decision.otherId);
+        if (choiceKey === "discard") {
+          const index = pendingAttackCardIndex(player);
+          if (index < 0) throw new Error(`You do not have a ${logCardName("zap", s)} card to discard.`);
+          const [answer] = player.hand.splice(index, 1);
+          discardCard(s, answer);
+          checkEmptyHandDraw(s, player);
+          addLog(s, `${player.name} answered ${themeCard("duel", s).name} with ${logCardName(answer.type, s)}.`);
+          s.pendingDecision = { ...decision, id: randomId("decision"), playerId: other.id, otherId: player.id, exchanges: (decision.exchanges || 0) + 1 };
+        } else {
+          const outcome = resolveDamage(s, other, player, 1, themeCard("duel", s).name, { ignoreShields: true });
+          if (s.lastEffect && outcome?.eliminatedIds?.length) outcome.eliminatedIds.forEach(id => { if (!s.lastEffect.eliminatedTargetIds.includes(id)) s.lastEffect.eliminatedTargetIds.push(id); });
+          addLog(s, `${player.name} ended ${themeCard("duel", s).name} and took 1 damage.`);
+          s.pendingDecision = null;
+          determineWinner(s);
+        }
+        return;
+      }
+
+      if (decision.kind === "drawSource") {
+        let drawnCount = 0;
+        if (choiceKey.startsWith("player:")) {
+          const target = playerById(s, choiceKey.slice(7));
+          const stolen = target?.alive ? takeRandom(target.hand) : null;
+          if (stolen) {
+            player.hand.push(stolen);
+            drawnCount++;
+            addLog(s, `${player.name}'s ${logPilotAbility(player, s)} took the first draw from ${target.name}'s hand.`);
+            checkEmptyHandDraw(s, target);
+          }
+        }
+        drawnCount += drawCards(s, player, Math.max(0, decision.drawAmount - drawnCount)).length;
+        s.pendingDecision = null;
+        finalizeTurnDraw(s, player, drawnCount);
+        return;
+      }
+
+      if (decision.kind === "discardDraw") {
+        let drawnCount = 0;
+        if (choiceKey === "discard" && s.discard.length) {
+          const recovered = s.discard.pop();
+          recovered.uid = randomId("card");
+          player.hand.push(ensureCardCheckData(recovered));
+          drawnCount = 1;
+          addLog(s, `${player.name}'s ${logPilotAbility(player, s)} used the top discard as the first draw.`);
+        }
+        drawnCount += drawCards(s, player, Math.max(0, decision.drawAmount - drawnCount)).length;
+        s.pendingDecision = null;
+        finalizeTurnDraw(s, player, drawnCount);
+        return;
+      }
+
+      if (decision.kind === "topThree") {
+        const cards = decision.cards || [];
+        const returned = cards.find(card => card.uid === choiceKey);
+        if (!returned) throw new Error("Choose one of the three revealed cards.");
+        cards.filter(card => card.uid !== returned.uid).forEach(card => player.hand.push(card));
+        s.deck.push(returned);
+        let drawnCount = Math.max(0, cards.length - 1);
+        drawnCount += drawCards(s, player, Math.max(0, decision.drawAmount - 2)).length;
+        addLog(s, `${player.name}'s ${logPilotAbility(player, s)} kept 2 cards and returned ${themeCard(returned.type, s)?.name || "1 card"} to the top of the deck.`);
+        s.pendingDecision = null;
+        finalizeTurnDraw(s, player, drawnCount);
+      }
+    }
+
+    function chooseBotPendingDecision(s, decision) {
+      const player = playerById(s, decision.playerId);
+      if (!player) return "damage";
+      if (decision.kind === "raidWave" || decision.kind === "duel") return pendingAttackCardIndex(player) >= 0 ? "discard" : "damage";
+      if (decision.kind === "drawSource") {
+        const candidates = (decision.candidateIds || []).map(id => playerById(s, id)).filter(target => target?.alive && target.hand.length).sort((a, b) => b.hand.length - a.hand.length);
+        return candidates.length ? `player:${candidates[0].id}` : "deck";
+      }
+      if (decision.kind === "discardDraw") return s.discard.length ? "discard" : "deck";
+      if (decision.kind === "topThree") return decision.cards?.[decision.cards.length - 1]?.uid || "";
+      return "";
+    }
+
+    async function resolvePendingDecision(choiceKey) {
+      const decision = state?.pendingDecision;
+      if (!decision || decision.playerId !== me?.id) return;
+      await mutate(s => resolvePendingDecisionState(s, me.id, choiceKey));
+    }
+
+    function renderPendingDecisionModal() {
+      const decision = state?.pendingDecision;
+      if (!decision || decision.playerId !== me?.id) {
+        if (cardChoiceRequest?.stateDecision) closeCardChoiceModal(true);
+        return;
+      }
+      const view = pendingDecisionView(decision, state);
+      if (!view) return;
+      if (cardChoiceRequest?.stateDecisionId === decision.id && !els.cardChoiceModal.classList.contains("hidden")) return;
+      cardChoiceRequest = { stateDecision: true, stateDecisionId: decision.id };
+      els.cardChoiceTitle.textContent = view.title;
+      els.cardChoiceBody.textContent = view.body;
+      els.cardChoiceOptions.innerHTML = view.options.map(option => `<button class="choice-option-btn" type="button" data-state-choice="${escapeHtml(option.key)}"><strong>${escapeHtml(option.label)}</strong>${option.desc ? `<small>${escapeHtml(option.desc)}</small>` : ""}</button>`).join("");
+      els.cardChoiceCancelBtn.classList.add("hidden");
+      els.cardChoiceModal.querySelector(".choice-modal")?.classList.add("state-decision");
+      els.cardChoiceModal.classList.remove("hidden");
+      els.cardChoiceOptions.querySelectorAll("[data-state-choice]").forEach(button => button.addEventListener("click", () => resolvePendingDecision(button.dataset.stateChoice)));
     }
 
     function themedText(text, s = state) {
@@ -2889,7 +3148,7 @@
       myRoleBanner: $("myRoleBanner"), identityPeek: $("identityPeek"), expansionPanel: $("expansionPanel"), playersTable: $("playersTable"), crewStatusLabel: $("crewStatusLabel"),
       currentLog: $("currentLog"), logToggle: $("logToggle"), logHistory: $("logHistory"), voiceTalkBtn: $("voiceTalkBtn"),
       handZone: $("handZone"), cards: $("cards"), handCount: $("handCount"), handInstruction: $("handInstruction"), endTurnBtn: $("endTurnBtn"),
-      gameOverBox: $("gameOverBox"), rulesModal: $("rulesModal"), rulesCards: $("rulesCards"), rulesPilots: $("rulesPilots"),
+      gameOverBox: $("gameOverBox"), rulesModal: $("rulesModal"), rulesAccordion: $("rulesAccordion"),
       pilotModal: $("pilotModal"), pilotModalTitle: $("pilotModalTitle"), pilotModalBody: $("pilotModalBody"), pilotModalBackBtn: $("pilotModalBackBtn"),
       exitModal: $("exitModal"), exitMessage: $("exitMessage"), stayInGameBtn: $("stayInGameBtn"), confirmExitBtn: $("confirmExitBtn"),
       cardChoiceModal: $("cardChoiceModal"), cardChoiceTitle: $("cardChoiceTitle"), cardChoiceBody: $("cardChoiceBody"), cardChoiceOptions: $("cardChoiceOptions"), cardChoiceCancelBtn: $("cardChoiceCancelBtn"),
@@ -2902,6 +3161,7 @@
     let roomVersion = 0;
     let state = null;
     let expansionMenuOpen = false;
+    const lobbyExpansionInfoOpen = new Set();
     let me = null;
     let selectedCardUid = null;
     let selectedTargetId = null;
@@ -4022,6 +4282,7 @@
         s.turn.cargoClaimed = !!s.turn.cargoClaimed;
       }
       s.lastEffect = s.lastEffect || null;
+      s.pendingDecision = s.pendingDecision && typeof s.pendingDecision === "object" ? s.pendingDecision : null;
       return s;
     }
 
@@ -6245,16 +6506,29 @@
       els.expansionGrid.innerHTML = Object.keys(EXPANSIONS).map(id => {
         const expansion = themeExpansion(id, state);
         const checked = isExpansion(state, id);
-        return `<label class="expansion-option ${checked ? "active" : ""}">
-          <div>
-            <div class="expansion-name">${expansion.name}</div>
-            <div class="expansion-source">${expansion.source}</div>
-            <div class="expansion-desc">${expansion.desc}</div>
+        const detailsOpen = lobbyExpansionInfoOpen.has(id);
+        return `<div class="expansion-option ${checked ? "active" : ""}">
+          <div class="expansion-option-head">
+            <button class="expansion-info-toggle" type="button" data-expansion-info="${id}" aria-expanded="${detailsOpen ? "true" : "false"}" aria-controls="expansion-info-${id}">
+              <span>
+                <span class="expansion-name">${escapeHtml(expansion.name)}</span>
+                <span class="expansion-source">${escapeHtml(expansion.source)}</span>
+                <span class="expansion-desc">${escapeHtml(expansion.desc)}</span>
+              </span>
+              <span class="expansion-info-arrow" aria-hidden="true">⌄</span>
+            </button>
+            <input class="expansion-check" type="checkbox" aria-label="${checked ? "Remove" : "Add"} ${escapeHtml(expansion.name)}" data-expansion-id="${id}" ${checked ? "checked" : ""} ${host ? "" : "disabled"}>
           </div>
-          <input class="expansion-check" type="checkbox" data-expansion-id="${id}" ${checked ? "checked" : ""} ${host ? "" : "disabled"}>
-        </label>`;
+          <div id="expansion-info-${id}" class="expansion-option-details ${detailsOpen ? "" : "hidden"}">${expansionLobbyDetailsHtml(id, state)}</div>
+        </div>`;
       }).join("");
       els.expansionGrid.querySelectorAll(".expansion-check").forEach(input => input.addEventListener("change", () => toggleExpansion(input.dataset.expansionId, input.checked)));
+      els.expansionGrid.querySelectorAll("[data-expansion-info]").forEach(button => button.addEventListener("click", () => {
+        const id = button.dataset.expansionInfo;
+        if (lobbyExpansionInfoOpen.has(id)) lobbyExpansionInfoOpen.delete(id);
+        else lobbyExpansionInfoOpen.add(id);
+        renderLobby();
+      }));
       const selected = selectedExpansionIds(state);
       els.expansionSummary.innerHTML = selected.length ? selected.map(id => `<span class="expansion-chip">${escapeHtml(themeExpansion(id, state).name)}</span>`).join("") : '<span class="expansion-chip">Base game only</span>';
       if (els.expansionCollapsedStatus) {
@@ -8451,119 +8725,139 @@
       return "Not in deck";
     }
 
+    function rulesSummaryHtml(title, subtitle = "", side = "") {
+      return `<span class="rules-summary-copy"><span class="rules-summary-title">${title}</span>${subtitle ? `<span class="rules-summary-sub">${subtitle}</span>` : ""}</span><span class="rules-summary-side">${side}<span class="rules-chevron" aria-hidden="true">⌄</span></span>`;
+    }
+
+    function rulesItemHtml(title, description, badge = "") {
+      return `<details class="rules-item-detail"><summary><span class="rules-item-name">${title}${badge ? `<em class="guide-card-count">${badge}</em>` : ""}</span><span class="rules-chevron" aria-hidden="true">⌄</span></summary><p class="rules-item-copy">${description}</p></details>`;
+    }
+
+    function rulesSubgroupHtml(title, subtitle, body) {
+      return `<details class="rules-subgroup"><summary>${rulesSummaryHtml(title, subtitle)}</summary><div class="rules-subgroup-body">${body}</div></details>`;
+    }
+
+    function expansionCardEntries(expansionId, s = state) {
+      const counts = EXPANSION_DECK_COUNTS[expansionId] || {};
+      return Object.entries(counts)
+        .filter(([, count]) => Number(count) > 0)
+        .map(([type, count]) => ({ type, count: Number(count), card: themeCard(type, s) }))
+        .filter(item => item.card);
+    }
+
+    function expansionFeatureNames(expansionId, s = state) {
+      if (expansionId === "orbit") return ["tailwind", "closeOrbit", "maintenance", "lowPower", "jammed"].map(id => themeRoundEvent(id, s)?.name).filter(Boolean);
+      if (expansionId === "chaos") return ["crossfire", "openVaults", "shieldBlackout", "gravityWell", "salvageWave"].map(id => themeRoundEvent(id, s)?.name).filter(Boolean);
+      if (expansionId === "show") return Object.keys(SHOW_EVENTS).map(id => themeShowEvent(id, s)?.name).filter(Boolean);
+      if (expansionId === "credits") return Object.keys(MARKET_ITEMS).map(id => themeMarketItem(id, s)?.name).filter(Boolean);
+      if (expansionId === "train") return Object.keys(TRAIN_CARGO).map(id => themeCargo(id, s)?.name).filter(Boolean);
+      if (expansionId === "legends") return [themeSettings(s).fameLabel, themeSettings(s).legendaryLabel];
+      return [];
+    }
+
+    function expansionLobbyDetailsHtml(expansionId, s = state) {
+      const cards = expansionCardEntries(expansionId, s);
+      const features = expansionFeatureNames(expansionId, s);
+      const theme = themeSettings(s);
+      const parts = [];
+      if (cards.length) parts.push(`<div class="expansion-detail-label">Cards added only while selected</div><div class="expansion-mini-list">${cards.map(({ card, count }) => `<span class="expansion-mini-chip">+${count} ${escapeHtml(card.name)}</span>`).join("")}</div>`);
+      if (expansionId === "charged") parts.push(`<div class="expansion-detail-label" style="margin-top:9px">${escapeHtml(theme.chargedCharacterLabel)} options</div><p class="expansion-detail-copy">Adds 8 battery-powered ${escapeHtml(theme.characterPlural.toLowerCase())} to the normal character pool only while this expansion is selected.</p>`);
+      if (features.length) parts.push(`<div class="expansion-detail-label" style="margin-top:${cards.length ? 9 : 0}px">Included features</div><div class="expansion-mini-list">${features.map(name => `<span class="expansion-mini-chip">${escapeHtml(name)}</span>`).join("")}</div>`);
+      if (expansionId === "frontier") parts.push(`<p class="expansion-detail-copy" style="margin-top:8px">Also unlocks the optional eighth player seat.</p>`);
+      if (!parts.length) parts.push(`<p class="expansion-detail-copy">${escapeHtml(themeExpansion(expansionId, s).desc)}</p>`);
+      return parts.join("");
+    }
+
+    function expansionRulesBodyHtml(expansionId, s = state) {
+      const theme = themeSettings(s);
+      const expansion = themeExpansion(expansionId, s);
+      const groups = [];
+      const cards = expansionCardEntries(expansionId, s);
+      if (cards.length) {
+        const cardBody = cards.map(({ card, count }) => rulesItemHtml(`${escapeHtml(card.icon)} ${escapeHtml(card.name)}`, escapeHtml(card.desc), `×${count}`)).join("");
+        groups.push(rulesSubgroupHtml("Cards", `${cards.reduce((sum, item) => sum + item.count, 0)} cards added when selected`, cardBody));
+      }
+      if (expansionId === "orbit" || expansionId === "chaos") {
+        const ids = expansionId === "orbit" ? ["tailwind", "closeOrbit", "maintenance", "lowPower", "jammed"] : ["crossfire", "openVaults", "shieldBlackout", "gravityWell", "salvageWave"];
+        const events = ids.map(id => themeRoundEvent(id, s)).filter(Boolean);
+        groups.push(rulesSubgroupHtml("Round events", "One active rule affects everyone", events.map(event => rulesItemHtml(`${escapeHtml(event.icon)} ${escapeHtml(event.name)}`, escapeHtml(event.desc))).join("")));
+      }
+      if (expansionId === "show") {
+        const events = Object.keys(SHOW_EVENTS).map(id => themeShowEvent(id, s)).filter(Boolean);
+        groups.push(rulesSubgroupHtml("Show events", escapeHtml(theme.showTriggerLabel), events.map(event => rulesItemHtml(`${escapeHtml(event.icon)} ${escapeHtml(event.name)}`, escapeHtml(event.desc))).join("")));
+      }
+      if (expansionId === "credits") {
+        const items = Object.keys(MARKET_ITEMS).map(id => themeMarketItem(id, s));
+        groups.push(rulesSubgroupHtml("Market", `Earn ${escapeHtml(theme.currencyPlural)} by causing damage`, items.map(item => rulesItemHtml(`${escapeHtml(item.icon)} ${escapeHtml(item.name)}`, escapeHtml(item.desc), `${item.cost} ${escapeHtml(item.cost === 1 ? theme.currencySingular : theme.currencyPlural)}`)).join("")));
+      }
+      if (expansionId === "charged") {
+        const pilots = CHARGED_PILOT_IDS.map(id => themePilotById(id, s));
+        groups.push(rulesSubgroupHtml(escapeHtml(theme.chargedCharacterLabel + "s"), `8 optional ${escapeHtml(theme.characterLabel.toLowerCase())} cards`, pilots.map(pilot => rulesItemHtml(`${escapeHtml(pilot.mark)} · ${escapeHtml(pilot.name)} · ♥${pilot.health}`, `<strong>${escapeHtml(pilot.abilityName)}:</strong> ${escapeHtml(pilot.ability)}`)).join("")));
+        groups.push(rulesSubgroupHtml("Batteries and reloads", "How Charged cards operate", `<ul class="rules-list"><li>${escapeHtml(theme.chargedGearLabel)} enters play with 3 ${escapeHtml(theme.storedPlural)} and is discarded when empty.</li><li>Normal ${escapeHtml(theme.equipmentNoun)} and required end-of-turn discards create ${escapeHtml(theme.loadPlural)}.</li><li>Waiting ${escapeHtml(theme.loadPlural)} must be placed before ending the turn. Turn on Boost to strengthen the next eligible ${escapeHtml(theme.chargedActionLabel)}.</li></ul>`));
+      }
+      if (expansionId === "train") {
+        const cargo = Object.keys(TRAIN_CARGO).map(id => themeCargo(id, s));
+        groups.push(rulesSubgroupHtml("Cargo rewards", `Discard 2 cards to claim one during your turn`, cargo.map(item => rulesItemHtml(`${escapeHtml(item.icon)} ${escapeHtml(item.name)}`, escapeHtml(item.desc))).join("")));
+      }
+      if (expansionId === "legends") {
+        groups.push(rulesSubgroupHtml("Fame and ascension", "Permanent reward at 3 fame", `<ul class="rules-list"><li>Successful damage and eliminations can earn ${escapeHtml(theme.fameLabel)}.</li><li>At 3 ${escapeHtml(theme.fameLabel)}, your ${escapeHtml(theme.characterLabel.toLowerCase())} becomes ${escapeHtml(theme.legendaryLabel)} and gains +1 maximum health, +1 range and +1 draw.</li></ul>`));
+      }
+      if (expansionId === "frontier") groups.unshift(rulesSubgroupHtml("Extra seat", "Optional eighth player", `<p class="rules-item-copy">Selecting ${escapeHtml(expansion.name)} raises the maximum room size from 7 to 8 and adds the matching eighth-role mix.</p>`));
+      return `<p class="rules-intro-note">${escapeHtml(expansion.source)}. ${escapeHtml(expansion.desc)} This expansion's cards and systems are used only while its checkbox is selected before the game begins.</p>${groups.join("")}`;
+    }
+
     function installRulesGuide() {
+      if (!els.rulesAccordion) return;
       const theme = themeSettings();
-      const sections = [...els.rulesModal.querySelectorAll(":scope > .modal > .rules-section")];
-      if (sections[0]) {
-        sections[0].querySelector("h3").textContent = theme.rulesHeading;
-        sections[0].querySelector("p").textContent = theme.rulesIntro;
-      }
-      if (sections[1]) {
-        sections[1].querySelector("h3").textContent = "Secret roles";
-        const roles = ["commander", "sentinel", "raider", "rogue"];
-        sections[1].querySelector(".role-grid").innerHTML = roles.map(id => {
-          const role = themeRole(id);
-          return `<div class="guide-item"><b>${escapeHtml(theme.roleSymbols[id])} ${escapeHtml(role.name)}</b><span>${escapeHtml(role.goal)}</span></div>`;
-        }).join("") + `<div class="guide-item"><b>Role mix by player count</b><span>4: 1 ${escapeHtml(themeRole("commander").name)}, 2 ${escapeHtml(themeRole("raider").name)}s, 1 ${escapeHtml(themeRole("rogue").name)} — no ${escapeHtml(themeRole("sentinel").name)}. 5: add 1 ${escapeHtml(themeRole("sentinel").name)}. 6: 1 ${escapeHtml(themeRole("sentinel").name)} and 3 ${escapeHtml(themeRole("raider").name)}s. 7: 2 ${escapeHtml(themeRole("sentinel").name)}s and 3 ${escapeHtml(themeRole("raider").name)}s. The optional eighth seat adds a second ${escapeHtml(themeRole("rogue").name)}.</span></div>`;
-      }
-      if (sections[2]) {
-        sections[2].querySelector("h3").textContent = `Face-up ${theme.characterPlural.toLowerCase()}`;
-        const commander = themeRole("commander");
-        sections[2].querySelector("p").textContent = `Roles are secret, but ${theme.characterLabel} cards are public. Tap any ${theme.characterLabel} name on the ${theme.groupLabel.toLowerCase()} table to read that ${theme.characterLabel}'s printed health and special ability. The ${commander.name} receives 1 health above the ${theme.characterLabel}'s printed health.`;
-      }
-      if (els.rulesPilots) {
-        els.rulesPilots.innerHTML = Object.keys(PILOTS).map(id => {
-          const pilot = themePilotById(id);
-          return `<div class="guide-item"><b>${escapeHtml(pilot.mark)} · ${escapeHtml(pilot.name)} · ♥${pilot.health}${pilot.chargedPilot ? ` · ${escapeHtml(theme.chargedCharacterLabel)}` : ""}</b><span><strong>${escapeHtml(pilot.abilityName)}:</strong> ${escapeHtml(pilot.ability)}</span></div>`;
-        }).join("");
-      }
-      if (sections[3]) {
-        const attack = themeCard("zap");
-        const commander = themeRole("commander");
-        sections[3].querySelector("h3").textContent = "Your turn";
-        sections[3].querySelector("ul").innerHTML = `
-          <li>You automatically draw two cards.</li>
-          <li>Tap a card to use it. Cards that do not need a target play immediately.</li>
-          <li>For a target card, players you can reach receive a thick double outline. Tap an outlined player card, then tap the small confirmation button such as “${escapeHtml(attack.name.replace(/[!?]+$/, ""))}?”</li>
-          <li>Play as many cards as you want. Normally you may use one ${escapeHtml(theme.attackNoun)} per turn; certain ${escapeHtml(theme.characterPlural)} and events increase that limit.</li>
-          <li>The ${escapeHtml(theme.tableNoun)} cards form an oval table. Starting with you, the cards alternate along the two sides, so nearby seats appear first and farther seats continue down the oval.</li>
-          <li>On each card: ♥ is health, 🂠 is hand size, 📏 is the current effective distance from you, and 🎯 is ${escapeHtml(theme.rangeNoun)}. Special equipment and character abilities are included in those numbers. Tap a player's name to see their ${escapeHtml(theme.characterLabel)}, visible role information and clickable equipment explanations.</li>
-          <li>Your normal ${escapeHtml(theme.rangeNoun)} is 1 seat. The players immediately beside you are distance 1; players farther around the circle are distance 2, 3, and so on. Range Gear and some ${escapeHtml(theme.characterLabel)} abilities increase how far you can reach.</li>
-          <li>Cards you do not play stay in your hand. When you end your turn, your hand limit equals your current health. If you have extra cards, tap End Turn, choose exactly which cards to discard, and then confirm the end of your turn. When no card in your hand can currently be played, End Turn glows to make the next step obvious, but you may still end earlier whenever you choose.</li><li>When a card offers two effects—such as a boosted Charged action or a choice between disrupting gear and removing a hand card—the app now lets human players choose the exact effect before the card is played.</li>
-          <li>The 80-card base deck now includes the full set of core card categories: range gear from 1 through 5, a range-1 multi-attack card, distance gear, automatic cover, delayed hazard and turn-delay cards, duel and group-response attacks, a shared supply card, group healing, and both 2-card and 3-card draw actions. Because this digital deck does not use printed suits, automatic cover and turn-delay checks use a 1-in-4 roll, while the delayed hazard uses the matching 2-in-13 roll.</li>`;
-      }
-      if (sections[4]) {
-        sections[4].querySelector("h3").textContent = "Cards";
-        sections[4].querySelector("p").textContent = `The count label shows the base-deck copies and any extra copies added by an expansion. Expansion cards are included only when their ${theme.expansionCollection.slice(0, -1) || "set"} is selected.`;
-      }
-      els.rulesCards.innerHTML = Object.keys(CARDS).map(type => {
-        const card = themeCard(type);
-        const countLabel = cardDeckCountLabel(type);
-        return `<div class="guide-item"><b>${card.icon} ${escapeHtml(card.name)}<em class="guide-card-count" title="${escapeHtml(countLabel)}">${escapeHtml(countLabel)}</em></b><span>${escapeHtml(card.desc)}</span></div>`;
+      const commander = themeRole("commander");
+      const ally = themeRole("sentinel");
+      const enemy = themeRole("raider");
+      const attack = themeCard("zap");
+      const defense = themeCard("shield");
+
+      const roleBody = ["commander", "sentinel", "raider", "rogue"].map(id => {
+        const role = themeRole(id);
+        return rulesItemHtml(`${escapeHtml(theme.roleSymbols[id])} ${escapeHtml(role.name)}`, escapeHtml(role.goal));
+      }).join("") + rulesItemHtml("Role mix by player count", `4 players: 1 ${escapeHtml(commander.name)}, 2 ${escapeHtml(enemy.name)}s and 1 ${escapeHtml(themeRole("rogue").name)}. Five players add 1 ${escapeHtml(ally.name)}. Six use 1 ${escapeHtml(ally.name)} and 3 ${escapeHtml(enemy.name)}s. Seven use 2 ${escapeHtml(ally.name)}s and 3 ${escapeHtml(enemy.name)}s. The optional eighth seat adds a second ${escapeHtml(themeRole("rogue").name)}.`);
+
+      const characterBody = BASE_PILOT_IDS.map(id => {
+        const pilot = themePilotById(id);
+        return rulesItemHtml(`${escapeHtml(pilot.mark)} · ${escapeHtml(pilot.name)} · ♥${pilot.health}`, `<strong>${escapeHtml(pilot.abilityName)}:</strong> ${escapeHtml(pilot.ability)}`);
       }).join("");
-      if (sections[5]) {
-        const defense = themeCard("shield");
-        const commander = themeRole("commander");
-        const ally = themeRole("sentinel");
-        const enemy = themeRole("raider");
-        sections[5].querySelector("h3").textContent = "Eliminations";
-        sections[5].querySelector("p").textContent = `A ${defense.name} card in your hand automatically blocks one point of damage. Eliminating a ${enemy.name} earns three cards. If the ${commander.name} accidentally eliminates a ${ally.name}, the ${commander.name} loses every card and equipped item.`;
-      }
-      const rulesBody = els.rulesCards.closest(".rules-section");
-      if (rulesBody) {
-        let expansionSection = $("expansionRulesGuide");
-        if (!expansionSection) {
-          expansionSection = document.createElement("div");
-          expansionSection.id = "expansionRulesGuide";
-          expansionSection.className = "rules-section";
-          rulesBody.parentElement.appendChild(expansionSection);
-        }
-        expansionSection.innerHTML = `<h3>${escapeHtml(theme.expansionTitle)}</h3><div class="role-grid">${Object.keys(EXPANSIONS).map(id => { const exp = themeExpansion(id); return `<div class="guide-item"><b>${escapeHtml(exp.name)}</b><span>${escapeHtml(exp.source)}. ${escapeHtml(exp.desc)}</span></div>`; }).join("")}</div>`;
 
-        let chargedSection = $("chargedRulesGuide");
-        if (!chargedSection) {
-          chargedSection = document.createElement("div");
-          chargedSection.id = "chargedRulesGuide";
-          chargedSection.className = "rules-section";
-          rulesBody.parentElement.appendChild(chargedSection);
-        }
-        const chargedName = themeExpansion("charged").name;
-        const attackName = themeCard("zap").name;
-        const defenseName = themeCard("shield").name;
-        const repairName = themeCard("repair").name;
-        chargedSection.innerHTML = `<h3>${escapeHtml(chargedName)} · ${escapeHtml(theme.storedPlural)}</h3>
-          <ul>
-            <li>${escapeHtml(theme.chargedGearLabel)} enters play with 3 ${escapeHtml(theme.storedPlural)} and can hold at most ${MAX_DEVICE_LOAD}. Each item spends its own ${escapeHtml(theme.storedPlural)} and is discarded when its last one is used.</li>
-            <li>Playing normal ${escapeHtml(theme.equipmentNoun)} creates a ${escapeHtml(theme.loadSingular)}. Cards discarded because you exceed your hand limit also create ${escapeHtml(theme.loadPlural)}.</li>
-            <li>Place each waiting ${escapeHtml(theme.loadSingular)} on any ${escapeHtml(theme.chargedGearLabel)} or on a ${escapeHtml(theme.chargedCharacterLabel)} before ending your turn. Tokens with no open slot are lost.</li>
-            <li>Turn on <b>Boost next ${escapeHtml(theme.chargedActionLabel)}</b> to spend 1 stored ${escapeHtml(theme.storedSingular)} and strengthen the next eligible action.</li>
-            <li>${escapeHtml(chargedName)} adds 28 cards total: 13 ${escapeHtml(theme.chargedGearLabel)} cards, 9 different ${escapeHtml(theme.chargedActionLabel)} cards, 4 extra ${escapeHtml(attackName)} cards, 1 extra ${escapeHtml(defenseName)} and 1 extra ${escapeHtml(repairName)}. It also adds 8 possible ${escapeHtml(theme.chargedCharacterLabel)} cards.</li>
-          </ul>`;
+      const turnBody = `<ul class="rules-list">
+        <li>You automatically draw two cards at the beginning of your turn.</li>
+        <li>Tap a card to use it. For a targeted card, tap an outlined player and then confirm the action.</li>
+        <li>Normally you may use one ${escapeHtml(theme.attackNoun)} per turn. Some ${escapeHtml(theme.characterPlural.toLowerCase())}, equipment and events change this.</li>
+        <li>♥ is health, 🂠 is hand size, 📏 is effective distance from you, and 🎯 is ${escapeHtml(theme.rangeNoun)}.</li>
+        <li>Tap a player's face or name to see their ${escapeHtml(theme.characterLabel.toLowerCase())}, visible role information and equipment.</li>
+        <li>When finished, tap End Turn. If your hand is larger than your health, choose the exact excess cards to discard and then confirm.</li>
+      </ul>`;
 
-        let botSpectatorSection = $("botSpectatorRulesGuide");
-        if (!botSpectatorSection) {
-          botSpectatorSection = document.createElement("div");
-          botSpectatorSection.id = "botSpectatorRulesGuide";
-          botSpectatorSection.className = "rules-section";
-          rulesBody.parentElement.appendChild(botSpectatorSection);
-        }
-        botSpectatorSection.innerHTML = `<h3>Watching bots finish</h3>
-          <p>When every human player has been eliminated but bots are still playing, bot turns automatically speed up. A small <b>Slow Down</b> button appears in the top bar immediately to the left of the room code. Tap it to return the bots to normal viewing speed; the button then changes to <b>Speed Up</b>. The control stays hidden while any human player is still alive.</p>`;
+      const baseCardBody = Object.keys(BASE_DECK_COUNTS).filter(type => Number(BASE_DECK_COUNTS[type]) > 0).map(type => {
+        const card = themeCard(type);
+        return rulesItemHtml(`${escapeHtml(card.icon)} ${escapeHtml(card.name)}`, escapeHtml(card.desc), `×${BASE_DECK_COUNTS[type]}`);
+      }).join("");
 
-        let voiceSection = $("voiceRulesGuide");
-        if (!voiceSection) {
-          voiceSection = document.createElement("div");
-          voiceSection.id = "voiceRulesGuide";
-          voiceSection.className = "rules-section";
-          rulesBody.parentElement.appendChild(voiceSection);
-        }
-        voiceSection.innerHTML = `<h3>Push-to-talk voice</h3>
-          <ul>
-            <li>Voice works in online rooms. Each person must tap the microphone on their own phone once and choose <b>Allow</b> when the browser asks for microphone access.</li>
-            <li>After permission is enabled, press and hold the microphone to talk and release it to stop. A large red pulse around the button confirms that your voice is live.</li>
-            <li>If the button shows an ×, microphone access is blocked for this site. Allow the microphone in that phone's browser site settings, then reopen the game.</li>
-          </ul>`;
-      }
+      const baseBody = `<p class="rules-intro-note">${escapeHtml(theme.rulesIntro)} Only the cards in this Base Game section are always shuffled into every game.</p>
+        ${rulesSubgroupHtml("Overview", escapeHtml(theme.rulesHeading), `<p class="rules-item-copy">${escapeHtml(theme.rulesIntro)}</p>`)}
+        ${rulesSubgroupHtml("Secret roles", "Goals and player-count mix", roleBody)}
+        ${rulesSubgroupHtml(`Face-up ${escapeHtml(theme.characterPlural)}`, "Open one character to read its power", characterBody)}
+        ${rulesSubgroupHtml("Your turn and the table", "Draw, act, target and end the turn", turnBody)}
+        ${rulesSubgroupHtml("Base cards", `${Object.values(BASE_DECK_COUNTS).reduce((sum, count) => sum + Number(count || 0), 0)} cards always included`, baseCardBody)}
+        ${rulesSubgroupHtml("Eliminations", "Rewards and penalties", `<ul class="rules-list"><li>A ${escapeHtml(defense.name)} in your hand automatically blocks one point of damage unless a rule says otherwise.</li><li>Eliminating a ${escapeHtml(enemy.name)} earns three cards.</li><li>If the ${escapeHtml(commander.name)} eliminates a ${escapeHtml(ally.name)}, the ${escapeHtml(commander.name)} loses every card and equipped item.</li></ul>`)}
+        ${rulesSubgroupHtml("Voice and bot viewing", "Optional interface features", `<ul class="rules-list"><li>In online rooms, each person taps the microphone once and grants permission. Hold it to talk and release it to stop.</li><li>If all human players are eliminated, bot turns speed up automatically. Use the top-bar speed button to slow them down again.</li></ul>`)}`;
+
+      const expansionBody = `<p class="rules-intro-note">Choose expansions in the room lobby before starting. Multiple checkboxes may be selected together. An unchecked expansion contributes no cards, characters, events or other systems to that game.</p><div class="rules-expansion-stack">${Object.keys(EXPANSIONS).map(id => {
+        const expansion = themeExpansion(id);
+        const selected = !!state && isExpansion(state, id);
+        const status = state ? `<span class="rules-selection-pill ${selected ? "on" : ""}">${selected ? "Selected" : "Not selected"}</span>` : `<span class="rules-selection-pill">Optional</span>`;
+        return `<details class="rules-major"><summary>${rulesSummaryHtml(`${escapeHtml(expansion.icon)} ${escapeHtml(expansion.name)}`, escapeHtml(expansion.desc), status)}</summary><div class="rules-major-body">${expansionRulesBodyHtml(id)}</div></details>`;
+      }).join("")}</div>`;
+
+      els.rulesAccordion.innerHTML = `
+        <details class="rules-major"><summary>${rulesSummaryHtml(`Base Game · ${escapeHtml(theme.title)}`, "Roles, characters, turn rules and the always-included cards", `<span class="rules-selection-pill on">Always on</span>`)}</summary><div class="rules-major-body">${baseBody}</div></details>
+        <details class="rules-major"><summary>${rulesSummaryHtml(escapeHtml(theme.expansionTitle), "Open an expansion to see exactly what it adds", `<span class="rules-selection-pill">${Object.keys(EXPANSIONS).length} options</span>`)}</summary><div class="rules-major-body">${expansionBody}</div></details>`;
     }
 
     function installEvents() {
