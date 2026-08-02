@@ -1820,9 +1820,9 @@
     .card {
       flex: 0 0 clamp(218px, 72vw, 250px);
       width: clamp(218px, 72vw, 250px);
-      height: clamp(318px, 94vw, 350px);
+      height: clamp(232px, 70vw, 252px);
       min-height: 0;
-      max-height: 350px;
+      max-height: 252px;
       display: flex;
       flex-direction: column;
       padding-bottom: 0;
@@ -1842,53 +1842,57 @@
       outline-offset: -4px;
     }
     .card-art {
-      flex: 0 0 clamp(126px, 38vw, 144px);
-      height: clamp(126px, 38vw, 144px);
+      flex: 0 0 clamp(124px, 37vw, 136px);
+      height: clamp(124px, 37vw, 136px);
       border-radius: 22px 22px 16px 16px;
       box-shadow: none !important;
     }
     .card-art-burst { opacity: .18; }
-    .card-art-motif { right: 16px; bottom: 16px; font-size: 46px; }
+    .card-art-motif { right: 16px; bottom: 15px; font-size: 46px; }
     .card-label-chip { left: 13px; top: 12px; padding: 5px 9px; font-size: 9px; }
+    .card-art-name {
+      position: absolute;
+      z-index: 3;
+      left: 15px;
+      right: 82px;
+      bottom: 16px;
+      min-height: 0;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      color: var(--text);
+      font-size: clamp(18px, 5.4vw, 21px);
+      font-weight: 950;
+      line-height: 1.08;
+      text-shadow: 0 2px 5px rgba(0,0,0,.72), 0 0 10px rgba(0,0,0,.42);
+    }
     .card-body {
       min-height: 0;
       flex: 1 1 auto;
-      display: grid;
-      grid-template-rows: minmax(48px, auto) 17px minmax(0, 1fr);
-      align-content: start;
-      padding: 13px 15px 15px;
+      display: block;
+      padding: 11px 15px 13px;
       overflow: hidden;
-    }
-    .card-name {
-      min-height: 48px;
-      display: flex;
-      align-items: center;
-      font-size: clamp(18px, 5.4vw, 21px);
-      line-height: 1.08;
-      overflow: hidden;
-    }
-    .card-type {
-      margin-top: 0;
-      font-size: 10px;
-      line-height: 17px;
     }
     .card-desc {
-      margin-top: 8px;
+      margin-top: 0;
       font-size: clamp(13px, 3.8vw, 15px);
       line-height: 1.35;
       display: -webkit-box;
       -webkit-box-orient: vertical;
-      -webkit-line-clamp: 5;
+      -webkit-line-clamp: 4;
       overflow: hidden;
     }
     @media (max-width: 380px) {
       .card {
         flex-basis: min(72vw, 244px);
         width: min(72vw, 244px);
-        height: min(94vw, 338px);
+        height: 236px;
       }
-      .card-art { flex-basis: 132px; height: 132px; }
-      .card-body { padding: 12px 14px 14px; }
+      .card-art { flex-basis: 126px; height: 126px; }
+      .card-art-name { left: 14px; right: 78px; bottom: 15px; }
+      .card-body { padding: 10px 14px 12px; }
     }
 
   </style>
@@ -7407,14 +7411,14 @@
           if (discardMode) {
             const selectedForDiscard = discardSelection.has(card.uid);
             const family = cardArtFamily(card.type);
-            return `<button class="card discard-choice ${selectedForDiscard ? "discard-selected" : ""}" data-card-uid="${card.uid}" style="--card-glow:${info.glow}" aria-pressed="${selectedForDiscard}" aria-label="${selectedForDiscard ? "Keep" : "Discard"} ${escapeHtml(info.name)}">${selectedForDiscard ? `<div class="discard-card-badge">Discard</div>` : ""}<div class="card-art family-${family}"><div class="card-art-scene"></div><div class="card-art-burst"></div><div class="card-art-detail"></div><div class="card-art-silhouette"></div><div class="card-art-motif">${info.icon}</div><div class="card-label-chip">${escapeHtml(info.type)}</div></div><div class="card-body"><div class="card-name">${info.name}</div><div class="card-type">${info.type}</div><div class="card-desc">${escapeHtml(info.shortDesc || info.desc)}</div></div></button>`;
+            return `<button class="card discard-choice ${selectedForDiscard ? "discard-selected" : ""}" data-card-uid="${card.uid}" style="--card-glow:${info.glow}" aria-pressed="${selectedForDiscard}" aria-label="${selectedForDiscard ? "Keep" : "Discard"} ${escapeHtml(info.name)}">${selectedForDiscard ? `<div class="discard-card-badge">Discard</div>` : ""}<div class="card-art family-${family}"><div class="card-art-scene"></div><div class="card-art-burst"></div><div class="card-art-detail"></div><div class="card-art-silhouette"></div><div class="card-art-name card-name">${info.name}</div><div class="card-art-motif">${info.icon}</div><div class="card-label-chip">${escapeHtml(info.type)}</div></div><div class="card-body"><div class="card-desc">${escapeHtml(info.shortDesc || info.desc)}</div></div></button>`;
           }
           const unavailableReason = themedText(cardUnavailableReason(card, mine), state);
           const playable = !unavailableReason;
           const badge = CHARGED_GEAR_TYPES.has(card.type) ? `3 ${theme.loadBadge}` : (CHARGED_ACTION_TYPES.has(card.type) && chargedBoostMode && totalStoredLoads(mine) > 0 && card.type !== "powerCell" ? "BOOST" : "");
           const title = unavailableReason ? ` title="${escapeHtml(unavailableReason)}" aria-label="${escapeHtml(info.name)} unavailable: ${escapeHtml(unavailableReason)}"` : ` aria-label="Play ${escapeHtml(info.name)}"`;
           const family = cardArtFamily(card.type);
-          return `<button class="card ${selectedCardUid === card.uid && playable ? "selected" : ""} ${playable ? "" : "disabled"}" data-card-uid="${card.uid}" style="--card-glow:${info.glow}" ${playable ? "" : "disabled"}${title}>${badge ? `<div class="card-load-badge">${badge}</div>` : ""}<div class="card-art family-${family}"><div class="card-art-scene"></div><div class="card-art-burst"></div><div class="card-art-detail"></div><div class="card-art-silhouette"></div><div class="card-art-motif">${info.icon}</div><div class="card-label-chip">${escapeHtml(info.type)}</div></div><div class="card-body"><div class="card-name">${info.name}</div><div class="card-type">${info.type}</div><div class="card-desc">${escapeHtml(info.shortDesc || info.desc)}</div></div></button>`;
+          return `<button class="card ${selectedCardUid === card.uid && playable ? "selected" : ""} ${playable ? "" : "disabled"}" data-card-uid="${card.uid}" style="--card-glow:${info.glow}" ${playable ? "" : "disabled"}${title}>${badge ? `<div class="card-load-badge">${badge}</div>` : ""}<div class="card-art family-${family}"><div class="card-art-scene"></div><div class="card-art-burst"></div><div class="card-art-detail"></div><div class="card-art-silhouette"></div><div class="card-art-name card-name">${info.name}</div><div class="card-art-motif">${info.icon}</div><div class="card-label-chip">${escapeHtml(info.type)}</div></div><div class="card-body"><div class="card-desc">${escapeHtml(info.shortDesc || info.desc)}</div></div></button>`;
         }).join("");
         els.cards.querySelectorAll(".card").forEach(node => node.addEventListener("click", () => discardMode ? toggleDiscardCard(node.dataset.cardUid) : selectCard(node.dataset.cardUid)));
       }
